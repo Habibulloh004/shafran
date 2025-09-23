@@ -6,13 +6,15 @@ import { Button } from "../ui/button"
 import Image from "next/image"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
+import { usePathname } from "next/navigation"
 
 gsap.registerPlugin(ScrollTrigger)
 
 export default function Header() {
   const headerRef = useRef(null)
   const [scrolled, setScrolled] = useState(false)
-
+  const pathname = usePathname()
+  console.log(pathname)
   useEffect(() => {
     if (!headerRef.current) return
 
@@ -44,6 +46,11 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+
+  if (pathname == "/login" || pathname == "/register") {
+    return <></>
+  }
+
   return (
     <header
       ref={headerRef}
@@ -54,11 +61,11 @@ export default function Header() {
           ? "bg-white/70 dark:bg-black/25 backdrop-blur-sm border-b-gray-200 dark:border-b-gray-800"
           : "bg-transparent"
         }`}>
-        
+
         {/* Left side - Burger + Logo */}
         <div className="flex items-center gap-2 sm:gap-3 md:gap-4">
           {/* Burger Menu */}
-          <Button variant="icon" size="icon" className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10">
+          <Button variant="icon" size="icon" className="md:hidden w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10">
             <svg className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
             </svg>

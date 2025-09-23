@@ -1,6 +1,4 @@
 import Image from "next/image";
-import logo from "@/assets/logo.webp"
-import logoB from "@/assets/logoB.webp"
 
 export default function LoginPage() {
   return (
@@ -18,7 +16,7 @@ export default function LoginPage() {
 
         <div className="gap-10 flex-col flex-1 flex justify-center items-center">
           <Image
-            src={logoB}
+            src={"/img/logoB.webp"}
             alt="Logo"
             width={300}
             height={300}
@@ -31,7 +29,7 @@ export default function LoginPage() {
         </div>
         <div className="flex-1 flex justify-center items-start">
           <Image
-            src={"/img/loginDark.svg"}
+            src={"/img/logoDark.svg"}
             alt="logo"
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             width={400}
