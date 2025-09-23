@@ -1,0 +1,139 @@
+"use client"
+
+import React, { useEffect, useRef, useState } from "react"
+import { ModeToggle } from "./mode-toggle"
+import { Button } from "../ui/button"
+import Image from "next/image"
+import gsap from "gsap"
+import { ScrollTrigger } from "gsap/ScrollTrigger"
+
+gsap.registerPlugin(ScrollTrigger)
+
+export default function Header() {
+  const headerRef = useRef(null)  // ✅ tuzatildi
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    if (!headerRef.current) return
+
+    let lastScroll = 0
+    const header = headerRef.current
+
+    // Background toggle
+    ScrollTrigger.create({
+      start: "top -80",
+      onEnter: () => setScrolled(true),
+      onLeaveBack: () => setScrolled(false),
+    })
+
+    // Scroll direction
+    const handleScroll = () => {
+      const currentScroll = window.scrollY
+
+      if (currentScroll > lastScroll && currentScroll > 80) {
+        // pastga scroll
+        gsap.to(header, { y: -100, duration: 0.4, ease: "power2.out" })
+      } else {
+        // yuqoriga scroll
+        gsap.to(header, { y: 0, duration: 0.4, ease: "power2.out" })
+      }
+      lastScroll = currentScroll
+    }
+
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
+
+  return (
+    <header
+      ref={headerRef}
+      className={`fixed top-0 left-0 z-10 w-full h-24 flex justify-center items-center border-b border-transparent transition-colors duration-300`}
+    >
+      <main className={`max-w-[1440px] flex justify-between items-center gap-3 w-11/12 mx-auto h-18 px-8 py-3 rounded-2xl
+        ${true
+          ? "bg-white/70 dark:bg-black/70 backdrop-blur-sm border-b-gray-200 dark:border-b-gray-800"
+          : "bg-transparent"
+        }`}>
+        <div className="relative w-32 max-h-16">
+          <Image
+            loading="eager"
+            src="/img/logoDark.svg"
+            alt="light mode"
+            width={0}
+            height={0}
+            className="absolute h-full w-full scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
+          />
+          <Image
+            loading="eager"
+            src="/img/logoLight.svg"
+            alt="dark mode"
+            width={0}
+            height={0}
+            className="h-full w-full scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
+          />
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <Button variant="icon" size="icon">
+            <Image
+              loading="eager"
+              src="/icons/searchDark.svg"
+              alt="light mode"
+              width={0}
+              height={0}
+              className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
+            />
+            <Image
+              loading="eager"
+              src="/icons/searchLight.svg"
+              alt="dark mode"
+              width={0}
+              height={0}
+              className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
+            />
+          </Button>
+
+          <Button variant="icon" size="icon">
+            <Image
+              loading="eager"
+              src="/icons/cartDark.svg"
+              alt="light mode"
+              width={0}
+              height={0}
+              className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
+            />
+            <Image
+              loading="eager"
+              src="/icons/cartLight.svg"
+              alt="dark mode"
+              width={0}
+              height={0}
+              className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
+            />
+          </Button>
+
+          <Button variant="icon" size="icon">
+            <Image
+              loading="eager"
+              src="/icons/profileDark.svg"
+              alt="light mode"
+              width={0}
+              height={0}
+              className="absolute h-[1.2rem] w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
+            />
+            <Image
+              loading="eager"
+              src="/icons/profileLight.svg"
+              alt="dark mode"
+              width={0}
+              height={0}
+              className="h-[1.2rem] w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
+            />
+          </Button>
+
+          <ModeToggle />
+        </div>
+      </main>
+    </header>
+  )
+}
