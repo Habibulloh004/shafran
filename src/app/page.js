@@ -5,7 +5,6 @@ import React from "react"
 import { Separator } from "@/components/ui/separator"
 import CustomBackground from "@/components/shared/customBackground"
 
-// assets dan import qilish (blur ishlashi uchun)
 import home1Light from "@/assets/img/home1Light.webp"
 import home1Dark from "@/assets/img/home1Dark.webp"
 import home2Light from "@/assets/img/home2Light.webp"
@@ -109,7 +108,7 @@ export default function HomePage() {
       <CustomBackground
         lightImage={home2Light}
         darkImage={home2Dark}
-        className="relative w-full md:min-h-screen flex flex-col sm:gap-4 pt-12 sm:pt-24"
+        className="relative w-full md:min-h-screen flex flex-col sm:gap-4 pt-12 sm:pt-24 pb-4"
         quality={100}
         priority
       >

@@ -1,8 +1,16 @@
+"use client"
+
 import Image from 'next/image'
 import React from 'react'
 import { Separator } from '../ui/separator'
+import { usePathname } from 'next/navigation'
 
 export default function Footer() {
+    const pathname = usePathname()
+
+  if (pathname == "/login" || pathname == "/register") {
+    return <></>
+  }
   return (
     <footer className='relative bg-[#F9F9F9] dark:bg-[#272727] w-full h-auto before:bg-neutral-200 dark:before:bg-[#CBCBCB] before:absolute before:-top-1 before:w-full before:h-[2px]'>
       <main className='pt-12 pb-4 space-y-5'>
