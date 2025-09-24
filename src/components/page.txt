@@ -1,18 +1,23 @@
 import Image from 'next/image'
 import React from 'react'
 import { Separator } from '@/components/ui/separator'
-import CustomBackground from '@/components/shared/customBackground'
 
 export default function HomePage() {
   return (
     <div>
       {/* Home 1 */}
-      <CustomBackground
-        lightImage="/img/home1Light.webp"
-        darkImage="/img/home1Dark.webp"
-        className="w-full md:min-h-screen flex justify-start items-center flex-col gap-2 sm:gap-4 py-12 sm:py-24"
-        priority={true}
-        quality={90}
+      <div
+        className="
+          relative 
+          w-full md:min-h-screen 
+          flex justify-start items-center flex-col gap-2 sm:gap-4
+          overflow-hidden
+          bg-[url('/img/home1Light.webp')] 
+          dark:bg-[url('/img/home1Dark.webp')]
+          bg-no-repeat bg-cover bg-[center_70%]
+          bg-scroll
+          py-12 sm:py-24
+        "
       >
         <div className="flex w-9/12 justify-center items-center gap-4 sm:gap-8 md:gap-16">
           <Separator className="flex-1 bg-separator-color" />
@@ -72,8 +77,8 @@ export default function HomePage() {
                     src="/background/creed.webp"
                     alt="img"
                     fill
-                    priority={false}
-                    quality={85}
+                    priority
+                    quality={100}
                     className="object-contain"
                   />
                 </div>
@@ -85,15 +90,21 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-      </CustomBackground>
+      </div>
 
       {/* Home 2 */}
-      <CustomBackground
-        lightImage="/img/home2Light.webp"
-        darkImage="/img/home2Dark.webp"
-        className="w-full md:min-h-screen flex flex-col justify-start items-center gap-2 sm:gap-4 pt-12 sm:pt-24"
-        priority={false}
-        quality={90}
+      <div
+        className="
+          relative 
+          w-full md:min-h-screen 
+          bg-scroll
+          flex flex-col justify-start items-center gap-2 sm:gap-4
+          overflow-hidden
+          bg-[url('/img/home2Light.webp')] 
+          dark:bg-[url('/img/home2Dark.webp')]
+          bg-no-repeat bg-cover bg-[center_70%]
+          pt-12 sm:pt-24
+        "
       >
         <div className="flex w-9/12 justify-center items-center gap-4 sm:gap-8 md:gap-16">
           <Separator className="flex-1 bg-separator-color" />
@@ -134,8 +145,8 @@ export default function HomePage() {
                     src="/background/flower.webp"
                     alt="img"
                     fill
-                    priority={false}
-                    quality={85}
+                    priority
+                    quality={100}
                     className="object-contain"
                   />
                 </div>
@@ -153,20 +164,20 @@ export default function HomePage() {
             src="/background/3Dark.webp"
             alt="img"
             fill
-            priority={false}
-            quality={85}
+            priority
+            quality={100}
             className="absolute inset-0 h-full w-full scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0 object-contain aspect-[16/4]"
           />
           <Image
             src="/background/3Light.webp"
             alt="img"
             fill
-            priority={false}
-            quality={85}
+            priority
+            quality={100}
             className="absolute inset-0 h-full w-full scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90 object-contain aspect-[16/4]"
           />
         </div>
-      </CustomBackground>
+      </div>
     </div>
   )
-}
+} 
