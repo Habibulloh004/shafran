@@ -1,21 +1,22 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   images: {
-    formats: ['image/webp', 'image/avif'],
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 86400, // 24 hours
-    dangerouslyAllowSVG: true,
-    contentDispositionType: 'attachment',
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    // Performance optimizations
-    loader: 'default',
-    path: '/_next/image',
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "cdn.uzlabs.uz",
+      },
+      {
+        protocol: "https",
+        hostname: "<accountid>.r2.cloudflarestorage.com",
+      },
+      {
+        protocol: "https",
+        hostname: "pub-9663a06e424a4b83b79dc3ab241710a4.r2.dev",
+      },
+    ],
   },
-  // Enable compression
-  compress: true,
-  // Enable SWC minification
-  swcMinify: true,
-}
 
-export default nextConfig
+};
+
+export default nextConfig;
