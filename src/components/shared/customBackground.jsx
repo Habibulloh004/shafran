@@ -1,5 +1,9 @@
+"use client"
+
+
 import Image from 'next/image'
-import React from 'react'
+import React, { useState } from 'react'
+
 
 const CustomBackground = ({
   lightImage,
@@ -7,32 +11,53 @@ const CustomBackground = ({
   children,
   className = '',
   priority = true,
-  quality = 100
+  quality = 75,
+  preload = true
 }) => {
+  const [lightLoaded, setLightLoaded] = useState(false)
+  const [darkLoaded, setDarkLoaded] = useState(false)
+
   return (
     <div className={`relative overflow-hidden ${className}`}>
+      {/* Preload hint for critical images */}
+      {preload && (
+        <>
+          <link rel="preload" as="image" href={lightImage} />
+          <link rel="preload" as="image" href={darkImage} />
+        </>
+      )}
+
+      {/* Fallback background color */}
+      <div className="absolute inset-0 bg-gray-100 dark:bg-gray-900" />
+
       {/* Dark mode background */}
       <Image
         src={darkImage}
-        alt="Background"
+        alt=""
         fill
         priority={priority}
         quality={quality}
-        className="absolute inset-0 object-cover object-center opacity-0 transition-opacity duration-300 ease-in-out dark:opacity-100"
+        unoptimized={false}
+        placeholder="empty"
+        onLoad={() => setDarkLoaded(true)}
+        className={`absolute inset-0 object-cover transition-opacity duration-500 ease-out ${darkLoaded ? 'opacity-100' : 'opacity-0'
+          } dark:block hidden`}
         sizes="100vw"
-        loading="eager"
       />
 
       {/* Light mode background */}
       <Image
         src={lightImage}
-        alt="Background"
+        alt=""
         fill
         priority={priority}
         quality={quality}
-        className="absolute inset-0 object-cover object-center opacity-100 transition-opacity duration-300 ease-in-out dark:opacity-0"
+        unoptimized={false}
+        placeholder="empty"
+        onLoad={() => setLightLoaded(true)}
+        className={`absolute inset-0 object-cover transition-opacity duration-500 ease-out ${lightLoaded ? 'opacity-100' : 'opacity-0'
+          } dark:hidden block`}
         sizes="100vw"
-        loading="eager"
       />
 
       {/* Content overlay */}
