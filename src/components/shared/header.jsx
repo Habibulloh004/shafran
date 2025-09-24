@@ -54,7 +54,7 @@ export default function Header() {
   return (
     <header
       ref={headerRef}
-      className={`fixed top-0 left-0 z-10 w-full h-16 sm:h-20 md:h-24 flex justify-center items-center border-b border-transparent transition-colors duration-300`}
+      className={`fixed top-0 left-0 z-[999] w-full h-16 sm:h-20 md:h-24 flex justify-center items-center border-b border-transparent transition-colors duration-300`}
     >
       <main className={`max-w-[1440px] flex justify-between items-center gap-2 sm:gap-3 w-11/12 mx-auto h-12 sm:h-16 md:h-18 px-3 sm:px-6 md:px-8 py-2 sm:py-3 rounded-xl sm:rounded-2xl
         ${scrolled

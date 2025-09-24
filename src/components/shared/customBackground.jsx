@@ -1,69 +1,46 @@
 "use client"
-
-
-import Image from 'next/image'
-import React, { useState } from 'react'
-
+import Image from "next/image"
+import React from "react"
 
 const CustomBackground = ({
   lightImage,
   darkImage,
   children,
-  className = '',
+  className = "",
   priority = true,
-  quality = 75,
-  preload = true
+  quality = 100,
 }) => {
-  const [lightLoaded, setLightLoaded] = useState(false)
-  const [darkLoaded, setDarkLoaded] = useState(false)
-
   return (
-    <div className={`relative overflow-hidden ${className}`}>
-      {/* Preload hint for critical images */}
-      {preload && (
-        <>
-          <link rel="preload" as="image" href={lightImage} />
-          <link rel="preload" as="image" href={darkImage} />
-        </>
-      )}
-
-      {/* Fallback background color */}
+    <div className={`w-full relative overflow-hidden ${className}`}>
+      {/* Fallback rang */}
       <div className="absolute inset-0 bg-gray-100 dark:bg-gray-900" />
 
       {/* Dark mode background */}
       <Image
         src={darkImage}
-        alt=""
+        alt="dark background"
         fill
         priority={priority}
         quality={quality}
-        unoptimized={false}
-        placeholder="empty"
-        onLoad={() => setDarkLoaded(true)}
-        className={`absolute inset-0 object-cover transition-opacity duration-500 ease-out ${darkLoaded ? 'opacity-100' : 'opacity-0'
-          } dark:block hidden`}
+        placeholder="blur"
+        className="absolute inset-0 object-cover hidden dark:block"
         sizes="100vw"
       />
 
       {/* Light mode background */}
       <Image
         src={lightImage}
-        alt=""
+        alt="light background"
         fill
         priority={priority}
         quality={quality}
-        unoptimized={false}
-        placeholder="empty"
-        onLoad={() => setLightLoaded(true)}
-        className={`absolute inset-0 object-cover transition-opacity duration-500 ease-out ${lightLoaded ? 'opacity-100' : 'opacity-0'
-          } dark:hidden block`}
+        placeholder="blur"
+        className="absolute inset-0 object-cover block dark:hidden"
         sizes="100vw"
       />
 
-      {/* Content overlay */}
-      <div className="relative z-10">
-        {children}
-      </div>
+      {/* Overlay content */}
+      <div className="relative z-10">{children}</div>
     </div>
   )
 }

@@ -42,8 +42,10 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   /* Custom adding colors */
+  --container: var(--container);
   --color-separator-color: var(--separator-color)
 }
+
 
 :root {
   --font-montserrat-alt: 'Montserrat Alternates', sans-serif;
@@ -132,4 +134,9 @@
   .font-montserrat-alt {
     font-family: var(--font-montserrat-alt);
   }
+
+  .containerCustom {
+    @apply max-w-[1440px] mx-auto px-4;
+  }
+
 }
