@@ -1,0 +1,22 @@
+import CustomBackground from '@/components/shared/customBackground'
+import React from 'react'
+import famale from '@/assets/background/famale.webp'
+import male from '@/assets/background/male.webp'
+import { cn } from '@/lib/utils'
+export default function CategoryPage({ searchParams }) {
+  const gender = searchParams.gender
+  return (
+    <CustomBackground
+      singleImage={gender == "male" ? male : famale}
+      className="relative w-full md:min-h-screen flex flex-col sm:gap-4 pt-12 sm:pt-24 pb-4"
+      quality={100}
+      type="single"
+      classNameImage={cn(gender == "male" ? "opacity-20" : "opacity-50 dark:opacity-30")}
+      priority
+    >
+      <div className='h-[2000px]'>
+
+      </div>
+    </CustomBackground>
+  )
+}
