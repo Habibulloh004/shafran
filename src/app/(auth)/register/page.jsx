@@ -72,6 +72,7 @@ export default function LoginPage() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="w-full space-y-4 sm:space-y-5 md:space-y-6"
               >
+                
                 <CustomFormField
                   fieldType={FormFieldType.INPUT}
                   control={form.control}
@@ -81,6 +82,7 @@ export default function LoginPage() {
                   inputClass="text-foreground rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
                   disabled={isLoading}
                 />
+
                 <CustomFormField
                   fieldType={FormFieldType.PHONE_INPUT}
                   control={form.control}
