@@ -44,8 +44,19 @@
   /* Custom adding colors */
   --container: var(--container);
   --color-separator-color: var(--separator-color)
-}
-
+;
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  @keyframes marquee {
+  from {
+    transform: translateX(0);}
+  to {
+    transform: translateX(calc(-100% - var(--gap)));}}
+  @keyframes marquee-vertical {
+  from {
+    transform: translateY(0);}
+  to {
+    transform: translateY(calc(-100% - var(--gap)));}}}
 
 :root {
   --font-montserrat-alt: 'Montserrat Alternates', sans-serif;
@@ -138,7 +149,6 @@
 .custom-scroll::-webkit-scrollbar-thumb:hover {
   background: rgba(0, 0, 0, 0.4);
 }
-
 
 .input-phone>* {
   /* dark:bg-input/30 */
@@ -234,6 +244,9 @@
 
   .font-montserrat-alt {
     font-family: var(--font-montserrat-alt);
+  }
+  .font-montserrat {
+    font-family: var(--font-montserrat);
   }
 
   .containerCustom {

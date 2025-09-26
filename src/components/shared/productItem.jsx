@@ -6,10 +6,11 @@ import React from 'react'
 import StarRating from './StarRating'
 import { Button } from '../ui/button'
 import { Plus } from 'lucide-react'
+import Link from 'next/link'
 
 export default function ProductItem() {
   return (
-    <div className='text-primary bg-white/60 dark:bg-black/60 rounded-[20px] overflow-hidden w-auto flex flex-col'>
+    <Link href="/category/12/product/12" className='text-primary bg-white/60 dark:bg-black/60 rounded-[20px] overflow-hidden w-auto flex flex-col'>
       <div className='bg-white/60 dark:bg-black/60 relative w-auto h-28 md:h-36'>
         <Image src="/background/creed.webp" className='object-contain p-2' alt="img" fill quality={100} />
       </div>
@@ -27,6 +28,6 @@ export default function ProductItem() {
         </div>
 
       </div>
-    </div>
+    </Link>
   )
 }

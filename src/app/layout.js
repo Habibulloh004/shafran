@@ -1,14 +1,20 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
 import Header from "@/components/shared/header";
 import { Montserrat_Alternates } from "next/font/google"
 import Footer from "@/components/shared/footer";
 
-const montserrat = Montserrat_Alternates({
+const montserratAlt = Montserrat_Alternates({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"], // kerakli og‘irliklarni yozasiz
   variable: "--font-montserrat-alt",   // CSS custom property
+})
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"], // kerakli og‘irliklarni yozasiz
+  variable: "--font-montserrat",
 })
 
 const geistSans = Geist({
@@ -33,7 +39,7 @@ export default function RootLayout({ children }) {
         <link rel="icon" href="/logo.svg" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${montserrat.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${montserratAlt.variable} ${montserrat?.variable} antialiased`}
       >
         <ThemeProvider
           attribute="class"
