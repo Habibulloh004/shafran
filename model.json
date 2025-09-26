@@ -1,0 +1,35 @@
+{
+  "product": {
+    "product_id": "string",
+    "images": [
+      "string"
+    ],
+    "product_name": "string",
+    "product_description": "string",
+    "price": 1,
+    "brand_name": "string",
+    "brand_id": "string",
+    "category_name": "string",
+    "category_id": "string",
+    "season": "string",
+    "type": "string",
+    "gender": "string",
+    "rating":"string",
+    "details": {
+      "description": "string",
+      "params": "string",
+      "notes": "string",
+      "country": "string",
+      "weight": "string",
+      "composition_images": [
+        "string"
+      ]
+    },
+    "ads": {
+      "title": "string",
+      "images": [
+        "string"
+      ]
+    }
+  }
+}
