@@ -4,6 +4,7 @@ import male from "@/assets/background/male.webp";
 import { cn } from "@/lib/utils";
 import ProductItem from "@/components/shared/productItem";
 import SidebarFilter from "@/components/shared/sidebarFilter";
+import { Button } from "@/components/ui/button";
 
 export default function CategoryItemPage({ searchParams }) {
   const gender = searchParams.gender;
@@ -19,8 +20,13 @@ export default function CategoryItemPage({ searchParams }) {
       )}
       priority
     >
-      <div className="w-11/12 containerCustom space-y-6">
-        <h1 className="text-center text-3xl font-bold font-montserrat-alt">Парфюм для неё</h1>
+      <div className="pt-4 w-11/12 containerCustom space-y-6">
+        <div className="max-xl:flex justify-between items-center ">
+          <h1 className="text-center text-xl md:text-3xl font-bold font-montserrat-alt">Парфюм для неё</h1>
+          <Button className={"xl:hidden"}>
+            Filter
+          </Button>
+        </div>
         <div className="relative flex gap-6">
           {/* Sidebar */}
           <aside className="max-md:hidden w-64 shrink-0">

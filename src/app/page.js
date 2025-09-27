@@ -29,7 +29,7 @@ export default function HomePage() {
         quality={100}
         priority
       >
-        <div className="containerCustom flex mx-auto w-11/12 justify-center items-center gap-4 sm:gap-8 md:gap-16 relative z-10">
+        <div className="pt-4 containerCustom flex mx-auto w-11/12 justify-center items-center gap-4 sm:gap-8 md:gap-16 relative z-10">
           <Separator className="flex-1 bg-separator-color" />
 
           <div className="relative h-8 w-16 sm:h-12 sm:w-24 md:h-16 md:w-32 flex-shrink-0">
