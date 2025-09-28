@@ -43,20 +43,30 @@
   --radius-xl: calc(var(--radius) + 4px);
   /* Custom adding colors */
   --container: var(--container);
-  --color-separator-color: var(--separator-color)
-;
+  --color-separator-color: var(--separator-color);
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+
   @keyframes marquee {
-  from {
-    transform: translateX(0);}
-  to {
-    transform: translateX(calc(-100% - var(--gap)));}}
+    from {
+      transform: translateX(0);
+    }
+
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
+    }
+  }
+
   @keyframes marquee-vertical {
-  from {
-    transform: translateY(0);}
-  to {
-    transform: translateY(calc(-100% - var(--gap)));}}}
+    from {
+      transform: translateY(0);
+    }
+
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
+    }
+  }
+}
 
 :root {
   --font-montserrat-alt: 'Montserrat Alternates', sans-serif;
@@ -133,8 +143,19 @@
   --separator-color: oklch(1 0 0 / 34.9%);
 }
 
+/* -------------------------
+   Scrollbar: Light (default)
+   ------------------------- */
+.custom-scroll {
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.25) transparent;
+}
+
+/* WebKit (Chrome, Safari, Edge) */
 .custom-scroll::-webkit-scrollbar {
   width: 6px;
+  height: 6px;
 }
 
 .custom-scroll::-webkit-scrollbar-track {
@@ -144,10 +165,60 @@
 .custom-scroll::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.25);
   border-radius: 8px;
+  border: 2px solid transparent;
+  /* little padding effect */
+  background-clip: padding-box;
+  transition: background-color 150ms ease;
 }
 
-.custom-scroll::-webkit-scrollbar-thumb:hover {
+.custom-scroll::-webkit-scrollbar-thumb:hover,
+.custom-scroll::-webkit-scrollbar-thumb:active {
   background: rgba(0, 0, 0, 0.4);
+}
+
+/* -------------------------
+   Dark mode (Tailwind .dark)
+   ------------------------- */
+.dark .custom-scroll {
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+
+.dark .custom-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.dark .custom-scroll::-webkit-scrollbar-thumb:hover,
+.dark .custom-scroll::-webkit-scrollbar-thumb:active {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+/* -------------------------
+   System dark mode fallback
+   ------------------------- */
+@media (prefers-color-scheme: dark) {
+  .custom-scroll {
+    scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+  }
+
+  .custom-scroll::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  .custom-scroll::-webkit-scrollbar-thumb:hover,
+  .custom-scroll::-webkit-scrollbar-thumb:active {
+    background: rgba(255, 255, 255, 0.32);
+  }
+}
+
+/* Optional: yuqori kontrast kerak bo'lsa elementga data atribut qo'shing:
+   <div class="custom-scroll" data-scroll-contrast="high"> ... </div>
+*/
+.custom-scroll[data-scroll-contrast="high"]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.dark .custom-scroll[data-scroll-contrast="high"]::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .input-phone>* {
@@ -245,6 +316,7 @@
   .font-montserrat-alt {
     font-family: var(--font-montserrat-alt);
   }
+
   .font-montserrat {
     font-family: var(--font-montserrat);
   }
