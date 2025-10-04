@@ -14,7 +14,7 @@ import Link from 'next/link';
 export default async function ConfirmPage({ searchParams }) {
   const params = await searchParams; // searchParams ni kutib olish kerak
   const gender = params?.gender;
-  if (true) {
+  if (false) {
     return (
       <CustomBackground
         singleImage={gender == "famale" ? famale : male}
