@@ -13,9 +13,9 @@ import Link from 'next/link';
 import ProductItem from '@/components/shared/productItem';
 import ProductDetails from './_components/ProductDetails';
 
-export default function ProductItemPage({ searchParams }) {
-  const gender = searchParams.gender;
-  
+export default async function ProductItemPage({ searchParams }) {
+const params = await searchParams; // searchParams ni kutib olish kerak
+  const gender = params?.gender;
   const infImg = [
     "/img/inf1.webp",
     "/img/inf2.webp",

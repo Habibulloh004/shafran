@@ -6,8 +6,9 @@ import ProductItem from "@/components/shared/productItem";
 import SidebarFilter from "@/components/shared/sidebarFilter";
 import { Button } from "@/components/ui/button";
 
-export default function CategoryItemPage({ searchParams }) {
-  const gender = searchParams.gender;
+export default async function CategoryItemPage({ searchParams }) {
+const params = await searchParams; // searchParams ni kutib olish kerak
+  const gender = params?.gender;
 
   return (
     <CustomBackground

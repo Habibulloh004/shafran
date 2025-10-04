@@ -43,6 +43,7 @@
   --radius-xl: calc(var(--radius) + 4px);
   /* Custom adding colors */
   --container: var(--container);
+  --color-check-active: var(--check-active);
   --color-separator-color: var(--separator-color);
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
@@ -104,6 +105,7 @@
   --sidebar-ring: oklch(0.708 0 0);
   /* Custom adding colors */
   --separator-color: oklch(0.2932 0.0858 37.33 / 34.9%);
+  --check-active:oklch(0.5843 0.2316 279.2);
 }
 
 .dark {
@@ -141,6 +143,7 @@
   --sidebar-ring: oklch(0.556 0 0);
   /* Custom adding colors */
   --separator-color: oklch(1 0 0 / 34.9%);
+  --check-active:oklch(0.5843 0.2316 279.2);
 }
 
 /* -------------------------
