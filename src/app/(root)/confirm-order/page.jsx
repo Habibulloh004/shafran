@@ -1,5 +1,5 @@
 import CustomBackground from '@/components/shared/customBackground'
-import React from 'react'
+import React, { useState } from 'react'
 import famale from "@/assets/background/famale.webp";
 import male from "@/assets/background/male.webp";
 import { cn } from '@/lib/utils';
@@ -14,7 +14,9 @@ import Link from 'next/link';
 export default async function ConfirmPage({ searchParams }) {
   const params = await searchParams; // searchParams ni kutib olish kerak
   const gender = params?.gender;
-  if (false) {
+  const [success, setSuccess] = useState(false)
+  
+  if (success) {
     return (
       <CustomBackground
         singleImage={gender == "famale" ? famale : male}
