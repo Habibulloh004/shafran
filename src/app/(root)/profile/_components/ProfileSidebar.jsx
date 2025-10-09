@@ -1,47 +1,59 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { User, Package, MapPin, Gift, LogOut } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import SidebarItem from './SidebarItem';
 import ExitModal from './ExitModal';
-import { useRouter } from 'next/navigation';
 
-export default function ProfileSidebar({activeTab}) {
+// Menu items configuration
+const MENU_ITEMS = [
+  { id: 'profile', label: 'My Profile', icon: User },
+  { id: 'orders', label: 'Orders', icon: Package },
+  { id: 'addresses', label: 'Addresses', icon: MapPin },
+  { id: 'bonus', label: 'Bonus', icon: Gift },
+];
+
+export default function ProfileSidebar({ activeTab }) {
+  const router = useRouter();
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
 
-  const menuItems = [
-    { id: 'profile', label: 'My Profile', icon: User },
-    { id: 'orders', label: 'Orders', icon: Package },
-    { id: 'addresses', label: 'Addresses', icon: MapPin },
-    { id: 'bonus', label: 'Bonus', icon: Gift },
-  ];
+  // Handle navigation to different tabs
+  const handleTabChange = useCallback((tabId) => {
+    router.push(`/profile?tab=${tabId}`);
+  }, [router]);
 
-  const handleExit = () => {
+  // Handle exit button click
+  const handleExit = useCallback(() => {
     setIsExitModalOpen(true);
-  };
+  }, []);
 
-  const confirmExit = () => {
-    // Add your logout logic here
+  // Handle exit confirmation
+  const confirmExit = useCallback(() => {
     console.log('User logged out');
     setIsExitModalOpen(false);
+    // Add your logout logic here
     // Example: router.push('/login')
-    // or signOut() from next-auth
-  };
+  }, []);
 
-  const router = useRouter()
+  // Handle modal close
+  const handleModalClose = useCallback(() => {
+    setIsExitModalOpen(false);
+  }, []);
 
   return (
     <>
       <aside className="w-auto lg:w-64 md:p-4">
         <h1 className='px-3 py-2 max-md:hidden'>Привет Азиз</h1>
+        
         <nav className="space-y-2">
-          {menuItems.map((item) => (
+          {MENU_ITEMS.map((item) => (
             <SidebarItem
               key={item.id}
               icon={item.icon}
               label={item.label}
               isActive={activeTab === item.id}
-              onClick={() => router.push(`/profile?tab=${item.id}`)}
+              onClick={() => handleTabChange(item.id)}
             />
           ))}
 
@@ -58,7 +70,7 @@ export default function ProfileSidebar({activeTab}) {
 
       <ExitModal
         isOpen={isExitModalOpen}
-        onClose={() => setIsExitModalOpen(false)}
+        onClose={handleModalClose}
         onConfirm={confirmExit}
       />
     </>
