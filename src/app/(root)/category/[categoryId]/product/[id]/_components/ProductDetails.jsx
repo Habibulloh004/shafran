@@ -18,13 +18,13 @@ export default function ProductDetails() {
       <div className='xl:hidden w-full justify-center items-center gap-10 flex'>
         <ImageGallery />
         <div className='flex flex-col gap-3 justify-center items-center'>
-          <Button type="outline" className={"rounded-xl h-10 md:h-12 w-32 text-[10px] md:text-md md:w-48 bg-white text-primary hover:text-primary hover:bg-white/70 cursor-pointer dark:bg-primary dark:text-white dark:hover:bg-primary/70"}>
+          <Button type="outline" className={"rounded-xl h-10 md:h-12 w-24 sm:w-32 text-[10px] md:text-md md:w-48 bg-white text-primary hover:text-primary hover:bg-white/70 cursor-pointer dark:bg-primary dark:text-white dark:hover:bg-primary/70"}>
             В корзину
           </Button>
-          <Button type="outline" className={"rounded-xl h-10 md:h-12 w-32 text-[10px] md:text-md md:w-48 bg-white text-primary hover:text-primary hover:bg-white/70 cursor-pointer dark:bg-primary dark:text-white dark:hover:bg-primary/70"}>
+          <Button type="outline" className={"rounded-xl h-10 md:h-12 w-24 sm:w-32 text-[10px] md:text-md md:w-48 bg-white text-primary hover:text-primary hover:bg-white/70 cursor-pointer dark:bg-primary dark:text-white dark:hover:bg-primary/70"}>
             Купить в 1 клик
           </Button>
-          <Button type="outline" className={"rounded-xl h-10 md:h-12 w-32 text-[10px] md:text-md md:w-48 bg-white text-primary hover:text-primary hover:bg-white/70 cursor-pointer dark:bg-primary dark:text-white dark:hover:bg-primary/70"}>
+          <Button type="outline" className={"rounded-xl h-10 md:h-12 w-24 sm:w-32 text-[10px] md:text-md md:w-48 bg-white text-primary hover:text-primary hover:bg-white/70 cursor-pointer dark:bg-primary dark:text-white dark:hover:bg-primary/70"}>
             Распив
           </Button>
         </div>

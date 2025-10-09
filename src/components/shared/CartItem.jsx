@@ -18,7 +18,7 @@ export default function CartItem() {
           />
         </div>
         <div>
-          <h1 className="font-bold text-sm md:text-xl">
+          <h1 className="font-bold text-sm md:text-xl line-clamp-1">
             DIOR SAUVAGE{" "}
             <span className="font-[400] text-[10px] text-primary md:text-xs">
               100 ml

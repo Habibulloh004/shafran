@@ -44,7 +44,7 @@ export default function CartDropdown() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="mr-6 max-md:hidden p-6 bg-white/80 dark:bg-black/80 backdrop-blur-[10px] min-w-auto max-w-xl right-1/2 left-1/2"
+            className="mt-4 mr-6 max-md:hidden p-6 bg-white/80 dark:bg-black/80 backdrop-blur-[10px] min-w-auto max-w-xl right-1/2 left-1/2"
           >
             <DropdownMenuLabel className="text-2xl text-center pb-2 border-b-2">
               Корзина
@@ -121,6 +121,7 @@ export default function CartDropdown() {
         flex flex-col
         md:hidden
         custom-scroll
+        mt-4
       "
           >
             <DialogHeader className={"p-0"}>

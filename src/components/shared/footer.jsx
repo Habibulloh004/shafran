@@ -12,7 +12,7 @@ export default function Footer() {
     return <></>
   }
   return (
-    <footer className='relative bg-[#F9F9F9] dark:bg-[#272727] w-full h-auto before:bg-neutral-200 dark:before:bg-[#CBCBCB] before:absolute before:-top-1 before:w-full before:h-[2px]'>
+    <footer className='text-xs sm:text-sm md:text-md relative bg-[#F9F9F9] dark:bg-[#272727] w-full h-auto before:bg-neutral-200 dark:before:bg-[#CBCBCB] before:absolute before:-top-1 before:w-full before:h-[2px]'>
       <main className='pt-12 pb-4 space-y-5'>
         <section className='max-w-[1440px] w-11/12 mx-auto flex flex-wrap gap-5 justify-between'>
           <div className='flex flex-col gap-3'>

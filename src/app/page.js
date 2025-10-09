@@ -17,6 +17,7 @@ import creed from "@/assets/background/creed.webp"
 import flower from "@/assets/background/flower.webp"
 import logoDark from "@/assets/img/logoDark.svg"
 import logoLight from "@/assets/img/logoLight.svg"
+import Link from "next/link"
 
 export default function HomePage() {
   return (
@@ -52,7 +53,7 @@ export default function HomePage() {
           <Separator className="flex-1 bg-separator-color" />
         </div>
 
-        <div className="containerCustom relative mx-auto w-11/12 h-[150px] sm:h-[200px] md:h-[250px] lg:h-[300px]">
+        <div className="containerCustom relative mx-auto w-11/12 h-20 md:h-42">
           <Image
             src={img2Dark}
             alt="dark img"
@@ -60,7 +61,7 @@ export default function HomePage() {
             priority
             quality={100}
             placeholder="blur"
-            className="absolute inset-0 h-full w-full scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0 object-contain aspect-[16/4]"
+            className="absolute inset-0 h-full w-full scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0 object-cover aspect-[16/4] rounded-2xl"
           />
           <Image
             src={img2Light}
@@ -69,7 +70,7 @@ export default function HomePage() {
             priority
             quality={100}
             placeholder="blur"
-            className="absolute inset-0 h-full w-full scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90 object-contain aspect-[16/4]"
+            className="absolute inset-0 h-full w-full scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90 object-cover aspect-[16/4] rounded-2xl"
           />
         </div>
 
@@ -77,11 +78,11 @@ export default function HomePage() {
           <h1 className="font-montserrat-alt text-lg sm:text-xl md:text-2xl">Для кого</h1>
           <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 justify-items-center w-full max-w-4xl">
             {[1, 2, 3].map((item, i) => (
-              <div
+              <Link
+                href="/category/12"
                 key={i}
-                className={`w-full max-w-[120px] sm:max-w-[160px] md:max-w-[200px] lg:max-w-[280px] rounded-lg sm:rounded-xl md:rounded-2xl bg-white/60 dark:bg-black/35 flex flex-col justify-center items-center p-2 sm:p-3 md:p-4 ${
-                  i === 1 ? "translate-y-4 sm:translate-y-6 md:translate-y-8 lg:translate-y-10" : ""
-                }`}
+                className={`w-full max-w-[120px] sm:max-w-[160px] md:max-w-[200px] lg:max-w-[280px] rounded-lg sm:rounded-xl md:rounded-2xl bg-white/60 dark:bg-black/35 flex flex-col justify-center items-center p-2 sm:p-3 md:p-4 ${i === 1 ? "translate-y-4 sm:translate-y-6 md:translate-y-8 lg:translate-y-10" : ""
+                  }`}
               >
                 <div className="relative w-[80px] h-[60px] sm:w-[120px] sm:h-[90px] md:w-[160px] md:h-[120px] lg:w-[200px] lg:h-[150px] xl:w-[250px] xl:h-[200px]">
                   <Image
@@ -98,7 +99,7 @@ export default function HomePage() {
                 <h1 className="text-xs sm:text-sm md:text-md font-semibold text-black dark:text-white">
                   {i === 0 ? "ДЛЯ НЕЁ" : i === 1 ? "ДЛЯ НЕГО" : "УНИ"}
                 </h1>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
@@ -139,11 +140,11 @@ export default function HomePage() {
           <h1 className="font-montserrat-alt text-lg sm:text-xl md:text-2xl">Категории</h1>
           <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 justify-items-center w-full max-w-4xl">
             {[1, 2, 3].map((item, i) => (
-              <div
+              <Link
+                href="/category/12"
                 key={i}
-                className={`w-full max-w-[120px] sm:max-w-[160px] md:max-w-[200px] lg:max-w-[280px] rounded-lg sm:rounded-xl md:rounded-2xl bg-white/70 backdrop-blur-[9px] dark:bg-black/35 flex flex-col justify-center items-center p-2 sm:p-3 md:p-4 ${
-                  i === 1 ? "translate-y-4 sm:translate-y-6 md:translate-y-8 lg:translate-y-10" : ""
-                }`}
+                className={`w-full max-w-[120px] sm:max-w-[160px] md:max-w-[200px] lg:max-w-[280px] rounded-lg sm:rounded-xl md:rounded-2xl bg-white/70 backdrop-blur-[9px] dark:bg-black/35 flex flex-col justify-center items-center p-2 sm:p-3 md:p-4 ${i === 1 ? "translate-y-4 sm:translate-y-6 md:translate-y-8 lg:translate-y-10" : ""
+                  }`}
               >
                 <div className="relative w-[80px] h-[60px] sm:w-[120px] sm:h-[90px] md:w-[160px] md:h-[120px] lg:w-[200px] lg:h-[150px] xl:w-[250px] xl:h-[200px]">
                   <Image
@@ -160,12 +161,12 @@ export default function HomePage() {
                 <h1 className="text-xs sm:text-sm md:text-md font-semibold text-black dark:text-white">
                   {i === 0 ? "ДЛЯ НЕЁ" : i === 1 ? "ДЛЯ НЕГО" : "УНИ"}
                 </h1>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
 
-        <div className="containerCustom relative mx-auto w-11/12 h-[150px] sm:h-[200px] md:h-[250px] lg:h-[300px]">
+        <div className="containerCustom relative mx-auto w-11/12 h-20 md:h-42 mt-4 md:mt-10 mb-4">
           <Image
             src={img3Dark}
             alt="dark img"
@@ -173,7 +174,7 @@ export default function HomePage() {
             priority
             quality={100}
             placeholder="blur"
-            className="absolute inset-0 h-full w-full scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0 object-contain aspect-[16/4]"
+            className="absolute inset-0 h-full w-full scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0 object-cover rounded-2xl aspect-[16/4]"
           />
           <Image
             src={img3Light}
@@ -182,7 +183,7 @@ export default function HomePage() {
             priority
             quality={100}
             placeholder="blur"
-            className="absolute inset-0 h-full w-full scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90 object-contain aspect-[16/4]"
+            className="absolute inset-0 h-full w-full scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90 object-cover rounded-2xl aspect-[16/4]"
           />
         </div>
       </CustomBackground>

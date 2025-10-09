@@ -22,7 +22,7 @@ export default function ImageGallery() {
       <div className="relative group">
         <Dialog>
           <DialogTrigger asChild>
-            <div className="cursor-zoom-in relative w-[120px] h-[200px] sm:w-[250px] sm:h-[350px] md:w-[350px] md:h-[450px] rounded-xl overflow-hidden">
+            <div className="cursor-zoom-in relative w-[100px] h-[200px] sm:w-[250px] sm:h-[350px] md:w-[350px] md:h-[450px] rounded-xl overflow-hidden">
               <Image
                 src={active}
                 alt="Main"

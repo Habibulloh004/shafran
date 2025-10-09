@@ -8,6 +8,7 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { usePathname } from "next/navigation"
 import CartDropdown from "./CartDropdown"
+import Link from "next/link"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -73,7 +74,7 @@ export default function Header() {
           </Button>
 
           {/* Logo */}
-          <div className="relative w-16 sm:w-24 md:w-32 h-8 sm:h-12 md:max-h-16">
+          <Link href="/" className="relative w-16 sm:w-24 md:w-32 h-8 sm:h-12 md:max-h-16">
             <Image
               loading="eager"
               src="/img/logoDark.svg"
@@ -90,7 +91,7 @@ export default function Header() {
               height={0}
               className="h-full w-full scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
             />
-          </div>
+          </Link>
         </div>
 
         {/* Right side - Icons */}
