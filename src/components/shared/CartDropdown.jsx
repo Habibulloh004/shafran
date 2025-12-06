@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react'
 import { Button } from '../ui/button'
 import Image from 'next/image'
@@ -6,10 +8,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import CartItem from './CartItem'
 import {
   Dialog,
   DialogContent,
@@ -18,13 +18,75 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
+import { useOrderStore, computeOrderTotals } from "@/store/orderStore";
+import CartItem from './CartItem';
+import Link from "next/link";
+import { useMemo } from "react";
+
+const CartList = ({ items }) => {
+  if (items.length === 0) {
+    return (
+      <div className="py-10 text-center text-sm text-muted-foreground">
+        Ваша корзина пуста
+      </div>
+    );
+  }
+
+  return (
+    <div className="max-h-[400px] overflow-y-auto space-y-3 pr-2 custom-scroll pt-2">
+      {items.map((item) => (
+        <DropdownMenuItem
+          key={item.key}
+          className="bg-white shadow dark:bg-[#151515] p-0 rounded-2xl overflow-hidden"
+          onSelect={(e) => e.preventDefault()}
+        >
+          <CartItem item={item} />
+        </DropdownMenuItem>
+      ))}
+    </div>
+  );
+};
+
 export default function CartDropdown() {
+  const items = useOrderStore((state) => state.items);
+  const clearCart = useOrderStore((state) => state.clearCart);
+  const totals = useMemo(() => computeOrderTotals(items), [items]);
+
+  const renderFooter = (isDialog = false) => {
+    const layoutClasses = isDialog
+      ? "flex-col items-stretch"
+      : "flex-row items-center";
+    const actionWidth = isDialog ? "w-full" : "flex-1";
+
+    return (
+      <div
+        className={`flex ${layoutClasses} justify-center gap-3 pt-4 w-full`}
+      >
+        <Link
+          href="/confirm-order"
+          className={`${actionWidth} h-11 rounded-2xl bg-primary/70 text-white flex items-center justify-center hover:bg-primary/60`}
+        >
+          Оформить заказ
+        </Link>
+        {items.length > 0 && (
+          <Button
+            variant={"outline"}
+            className={`${actionWidth} h-11 rounded-2xl bg-primary/10 text-black dark:text-white`}
+            onClick={clearCart}
+          >
+            Убрать всё
+          </Button>
+        )}
+      </div>
+    );
+  };
+
   return (
     <>
       <div className='max-md:hidden'>
         <DropdownMenu className="">
-          <DropdownMenuTrigger>
-            <Button variant="icon" size="icon" className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10">
+          <DropdownMenuTrigger asChild>
+            <Button variant="icon" size="icon" className="relative w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10">
               <Image
                 loading="eager"
                 src="/icons/cartDark.svg"
@@ -41,42 +103,28 @@ export default function CartDropdown() {
                 height={0}
                 className="h-[1.1rem] w-[1.1rem] md:h-[1.2rem] md:w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
               />
+              {totals.quantity > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] rounded-full px-1">
+                  {totals.quantity}
+                </span>
+              )}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent
-            className="mt-4 mr-6 max-md:hidden p-6 bg-white/80 dark:bg-black/80 backdrop-blur-[10px] min-w-auto max-w-xl right-1/2 left-1/2"
+            className="mt-4 mr-6 max-md:hidden p-6 bg-white/80 dark:bg-black/80 backdrop-blur-[10px] min-w-auto md:min-w-md max-w-xl right-1/2 left-1/2"
           >
-            <DropdownMenuLabel className="text-2xl text-center pb-2 border-b-2">
-              Корзина
+            <DropdownMenuLabel className="text-2xl text-center pb-2 border-b-2 flex flex-col gap-1">
+              <span>Корзина</span>
+              {totals.quantity > 0 && (
+                <span className="text-sm text-muted-foreground">
+                  {totals.quantity} товаров · {totals.amount.toLocaleString()} {totals.currency}
+                </span>
+              )}
             </DropdownMenuLabel>
 
-            {/* Scroll qiladigan container */}
-            <div className="max-h-[400px] overflow-y-auto space-y-2 pr-2 custom-scroll pt-2">
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9]?.map((caches, i) => (
-                <DropdownMenuItem
-                  key={i}
-                  className="max-w-auto min-w-auto bg-white shadow dark:bg-[#151515] p-0 rounded-2xl overflow-hidden"
-                  onSelect={(e) => e.preventDefault()} // yopilib ketmasin
-                >
-                  <CartItem />
-                </DropdownMenuItem>
-              ))}
-            </div>
+            <CartList items={items} />
 
-            <div className="flex justify-center items-center gap-3 pt-4">
-              <Button
-                variant={"outline"}
-                className="flex-1 h-11 rounded-2xl dark:bg-primary/50 dark:hover:bg-primary/70 bg-primary/70 text-white hover:bg-primary/50 hover:text-white cursor-pointer"
-              >
-                Подтведить заказ
-              </Button>
-              <Button
-                variant={"outline"}
-                className="flex-1 h-11 rounded-2xl bg-primary/10 text-black dark:text-white"
-              >
-                Убрать всё
-              </Button>
-            </div>
+            {renderFooter(false)}
           </DropdownMenuContent>
 
         </DropdownMenu>
@@ -87,7 +135,7 @@ export default function CartDropdown() {
             <Button
               variant="icon"
               size="icon"
-              className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10"
+              className="relative w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10"
             >
               <Image
                 loading="eager"
@@ -105,6 +153,11 @@ export default function CartDropdown() {
                 height={0}
                 className="h-[1.1rem] w-[1.1rem] md:h-[1.2rem] md:w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
               />
+              {totals.quantity > 0 && (
+                <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] rounded-full px-1">
+                  {totals.quantity}
+                </span>
+              )}
             </Button>
           </DialogTrigger>
           <DialogContent
@@ -133,21 +186,20 @@ export default function CartDropdown() {
                 and remove your data from our servers.
               </DialogDescription>
             </DialogHeader>
-            <div className='custom-scroll pr-1 flex-1 space-y-2 max-h-[calc(100vh-400px)] overflow-y-scroll'>
-              {[1, 2, 3, 4, 5, 6]?.map((caches, i) => (
-                <div key={i} className="max-w-auto min-w-auto bg-white shadow dark:bg-[#151515] p-0 rounded-2xl overflow-hidden">
-                  <CartItem />
-                </div>
-              ))}
+            <div className='custom-scroll pr-1 flex-1 space-y-2 w-full max-h-[calc(100vh-400px)] overflow-y-auto'>
+              {items.length === 0 ? (
+                <p className="text-sm text-center text-muted-foreground py-6">
+                  Ваша корзина пуста
+                </p>
+              ) : (
+                items.map((item) => (
+                  <div key={item.key} className="bg-white shadow dark:bg-[#151515] p-0 rounded-2xl overflow-hidden">
+                    <CartItem item={item} />
+                  </div>
+                ))
+              )}
             </div>
-            <div className='flex justify-center items-center gap-3 pb-4'>
-              <Button variant={"outline"} className={"flex-1 h-10 rounded-2xl dark:bg-primary/50 dark:hover:bg-primary/70 bg-primary/70 text-white hover:bg-primary/50 hover:text-white cursor-pointer"}>
-                Подтведить заказ
-              </Button>
-              <Button variant={"outline"} className={"flex-1 h-10 rounded-2xl bg-primary/10 text-black dark:text-white"}>
-                Убрать всё
-              </Button>
-            </div>
+            {renderFooter(true)}
           </DialogContent>
         </Dialog>
       </div>

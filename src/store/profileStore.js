@@ -6,11 +6,16 @@ export const useProfileStore = create(
     (set) => ({
       activeTab: 'profile',
       setActiveTab: (tab) => set({ activeTab: tab }),
+      orders: [],
+      setOrders: (orders) => set({ orders }),
     }),
     {
       name: 'profile-storage', // unique name for localStorage key
       storage: createJSONStorage(() => localStorage), // use localStorage
-      partialize: (state) => ({ activeTab: state.activeTab }), // only persist activeTab
+      partialize: (state) => ({
+        activeTab: state.activeTab,
+        orders: state.orders,
+      }), // only persist activeTab
     }
   )
 );

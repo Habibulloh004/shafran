@@ -1,43 +1,92 @@
-"use client"
+"use client";
 
-import CustomFormField, { FormFieldType } from "@/components/shared/customFormField";
+import CustomFormField, {
+  FormFieldType,
+} from "@/components/shared/customFormField";
 import { Form } from "@/components/ui/form";
 import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import z from "zod";
-import { zodResolver } from "@hookform/resolvers/zod"
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { registerUser } from "actions/post";
 
-export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false)
-  const LoginValidation = z.object({
-    name: z
-      .string()
-      .min(3, { message: "Имя обязательно." }),
-    phone: z
-      .string()
-      .min(13, { message: "Неверный номер телефона" })
-      .max(14, { message: "Неверный номер телефона" }),
+const RegisterSchema = z.object({
+  first_name: z
+    .string()
+    .min(2, { message: "Имя обязательно и должно содержать не менее 2 символов." }),
+  last_name: z
+    .string()
+    .min(2, { message: "Фамилия обязательна и должна содержать не менее 2 символов." }),
+  phone_number: z
+    .string()
+    .min(13, { message: "Неверный номер телефона" })
+    .max(14, { message: "Неверный номер телефона" }),
+  password: z
+    .string()
+    .min(6, { message: "Пароль должен содержать не менее 6 символов." }),
+  date_of_birth: z.string().refine((value) => {
+    if (!value) return false;
+    const date = new Date(value);
+    return !Number.isNaN(date.getTime());
+  }, "Выберите дату рождения"),
+  gender: z.enum(["1", "2"], {
+    errorMap: () => ({
+      message: "Выберите пол.",
+    }),
+  }),
+});
 
-    password: z
-      .string()
-      .min(6, { message: "Password in 6 characters" }),
-  });
+export default function RegisterPage() {
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const router = useRouter();
 
   const form = useForm({
-    resolver: zodResolver(LoginValidation),
+    resolver: zodResolver(RegisterSchema),
     defaultValues: {
-      phone: "",
-      name:"",
+      first_name: "",
+      last_name: "",
+      phone_number: "",
       password: "",
+      date_of_birth: "",
+      gender: "",
     },
   });
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
+    setErrorMessage("");
+    setIsLoading(true);
+    console.log("Register form values:", values);
+    try {
+      const res = await registerUser({
+        first_name: values.first_name,
+        last_name: values.last_name,
+        phone: values.phone_number,
+        password: values.password,
+        date_of_birth: values.date_of_birth,
+        gender: Number(values.gender)
+      });
 
-  }
+      if (res.success) {
+        router.push("/login");
+      } else {
+        throw new Error(res.error || 'Registration failed');
+      }
+    } catch (error) {
+      console.error("Register error", error);
+      const message =
+        error?.details?.error?.message ||
+        error?.message ||
+        "Не удалось зарегистрироваться. Попробуйте ещё раз.";
+      setErrorMessage(message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="
@@ -72,50 +121,81 @@ export default function LoginPage() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="w-full space-y-4 sm:space-y-5 md:space-y-6"
               >
-                
-                <CustomFormField
-                  fieldType={FormFieldType.INPUT}
-                  control={form.control}
-                  name="name"
-                  placeholder={"Ваше имя"}
-                  label={"Имя"}
-                  inputClass="text-foreground rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
-                  disabled={isLoading}
-                />
-
-                <CustomFormField
-                  fieldType={FormFieldType.PHONE_INPUT}
-                  control={form.control}
-                  name="phone"
-                  placeholder={"Enter phone"}
-                  label={"Номер телефона"}
-                  inputClass="text-foreground w-full"
-                  disabled={isLoading}
-                />
-
-                <div className="flex gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                   <CustomFormField
-                    fieldType={FormFieldType.PASSWORDINPUT}
+                    fieldType={FormFieldType.INPUT}
                     control={form.control}
-                    name="password"
-                    placeholder={"Пароль"}
-                    label={"Пароль"}
+                    name="first_name"
+                    placeholder={"Имя"}
+                    label={"Имя"}
                     inputClass="text-white rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
                     disabled={isLoading}
                   />
+
                   <CustomFormField
-                    fieldType={FormFieldType.PASSWORDINPUT}
+                    fieldType={FormFieldType.INPUT}
                     control={form.control}
-                    name="password"
-                    placeholder={"Пароль"}
-                    label={"Подтвердите пароль"}
+                    name="last_name"
+                    placeholder={"Фамилия"}
+                    label={"Фамилия"}
                     inputClass="text-white rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
                     disabled={isLoading}
                   />
                 </div>
 
+                <CustomFormField
+                  fieldType={FormFieldType.PHONE_INPUT}
+                  control={form.control}
+                  name="phone_number"
+                  placeholder={"Введите номер телефона"}
+                  label={"Номер телефона"}
+                  inputClass="text-white w-full"
+                  disabled={isLoading}
+                />
+
+                <CustomFormField
+                  fieldType={FormFieldType.INPUT}
+                  control={form.control}
+                  name="password"
+                  placeholder={"Введите пароль"}
+                  label={"Пароль"}
+                  inputType="password"
+                  inputClass="text-white rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
+                  disabled={isLoading}
+                />
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <CustomFormField
+                    fieldType={FormFieldType.INPUT}
+                    control={form.control}
+                    name="date_of_birth"
+                    placeholder={"Дата рождения"}
+                    label={"Дата рождения"}
+                    inputType="date"
+                    inputClass="text-white rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
+                    disabled={isLoading}
+                  />
+
+                  <CustomFormField
+                    fieldType={FormFieldType.SELECT}
+                    control={form.control}
+                    name="gender"
+                    placeholder="Выберите пол"
+                    label="Пол"
+                    options={[
+                      { value: "1", label: "Мужской" },
+                      { value: "2", label: "Женский" },
+                    ]}
+                    className="text-white h-10 sm:h-11 md:h-12"
+                    disabled={isLoading}
+                  />
+                </div>
+
+                {errorMessage && (
+                  <p className="text-sm text-red-400">{errorMessage}</p>
+                )}
+
                 <div className="w-full flex justify-center items-center flex-col gap-3 sm:gap-4">
-                  {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={isLoading}
@@ -131,15 +211,14 @@ export default function LoginPage() {
                     text-white bg-transparent hover:bg-transparent cursor-pointer border border-input w-full p-2 sm:p-3 md:p-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base transition-all duration-200"
                   >
                     {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {isLoading ? "Submiting..." : "Регистрация"}
+                    {isLoading ? "Отправка..." : "Регистрация"}
                   </button>
 
-                  {/* Register Link */}
-                  <p className="text-sm sm:text-base text-center text-gray-600">
-                    Уже есть аккаунт? {" "}
+                  <p className="text-sm sm:text-base text-center text-gray-300">
+                    Уже есть аккаунт?{" "}
                     <Link
                       href="/login"
-                      className="text-blue-600 hover:text-blue-700 hover:underline font-medium transition-colors"
+                      className="text-blue-400 hover:text-blue-300 hover:underline font-medium transition-colors"
                     >
                       Войти
                     </Link>
@@ -163,53 +242,5 @@ export default function LoginPage() {
         </div>
       </main>
     </div>
-  )
+  );
 }
-// import Image from "next/image";
-
-// export default function RegisterPage() {
-//   return (
-//     <div
-//       className="
-//         relative
-//         w-full min-h-screen
-//         flex justify-center items-start
-//         overflow-hidden
-//         before:absolute before:inset-0
-//         before:bg-[url(/img/gul.webp)]
-//         before:bg-no-repeat before:bg-cover before:bg-[center_70%]
-//         before:brightness-150
-//         before:blur-[5px]
-//         before:scale-105
-//         before:z-0
-//       "
-//     >
-//       {/* Content */}
-//       <main className="relative z-10 max-w-[1440px] mx-auto flex flex-wrap w-full gap-3 justify-center items-start py-20 px-10">
-//         <div className="gap-10 flex-col flex-1 flex justify-center items-center">
-//           <Image
-//             src={'/img/logoB.webp'}
-//             alt="Logo"
-//             width={300}
-//             height={300}
-//             loading="eager"
-//             sizes="(max-width: 768px) 75vw, (max-width: 1200px) 50vw, 33vw"
-//           />
-//           <div className="backdrop-blur-sm shadow-[0px_0px_21.6px_-7px_#966877] w-2/3 rounded-[10px] p-2 min-h-56 bg-[#151515BF]">
-//             Register form
-//           </div>
-//         </div>
-//         <div className="flex-1 flex justify-center items-start">
-//           <Image
-//             src={"/img/logoDark.svg"}
-//             alt="logo"
-//             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-//             width={400}
-//             height={400}
-//             loading="eager"
-//           />
-//         </div>
-//       </main>
-//     </div>
-//   )
-// }

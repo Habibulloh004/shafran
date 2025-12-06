@@ -6,9 +6,10 @@ import { Button } from "../ui/button"
 import Image from "next/image"
 import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import CartDropdown from "./CartDropdown"
 import Link from "next/link"
+import { useAuthStore } from "@/store/authStore"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -16,7 +17,17 @@ export default function Header() {
   const headerRef = useRef(null)
   const [scrolled, setScrolled] = useState(false)
   const pathname = usePathname()
-  console.log(pathname)
+  const router = useRouter()
+  const user = useAuthStore((state) => state.user)
+  const token = useAuthStore((state) => state.token)
+
+  const handleProfileClick = () => {
+    if (user && token) {
+      router.push("/profile")
+    } else {
+      router.push("/login")
+    }
+  }
   useEffect(() => {
     if (!headerRef.current) return
 
@@ -115,24 +126,40 @@ export default function Header() {
             />
           </Button>
           <CartDropdown/>
-          <Button variant="icon" size="icon" className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10">
-            <Image
-              loading="eager"
-              src="/icons/profileDark.svg"
-              alt="light mode"
-              width={0}
-              height={0}
-              className="absolute h-[1.1rem] w-[1.1rem] md:h-[1.2rem] md:w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
-            />
-            <Image
-              loading="eager"
-              src="/icons/profileLight.svg"
-              alt="dark mode"
-              width={0}
-              height={0}
-              className="h-[1.1rem] w-[1.1rem] md:h-[1.2rem] md:w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
-            />
-          </Button>
+
+          {user && token ? (
+            <Button
+              variant="icon"
+              size="icon"
+              onClick={handleProfileClick}
+              className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10"
+            >
+              <Image
+                loading="eager"
+                src="/icons/profileDark.svg"
+                alt="light mode"
+                width={0}
+                height={0}
+                className="absolute h-[1.1rem] w-[1.1rem] md:h-[1.2rem] md:w-[1.2rem] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0"
+              />
+              <Image
+                loading="eager"
+                src="/icons/profileLight.svg"
+                alt="dark mode"
+                width={0}
+                height={0}
+                className="h-[1.1rem] w-[1.1rem] md:h-[1.2rem] md:w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
+              />
+            </Button>
+          ) : (
+            <Button
+              onClick={handleProfileClick}
+              variant="outline"
+              className="h-8 sm:h-9 md:h-10 px-3 sm:px-4 md:px-5 text-xs sm:text-sm font-medium rounded-lg border border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all"
+            >
+              Kirish
+            </Button>
+          )}
 
           <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10">
             <ModeToggle />

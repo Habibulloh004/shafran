@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Gift, TrendingUp, TrendingDown, Coins } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,13 +13,7 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 
-export default function BonusSection() {
-  const transactions = [
-    { id: '#7475567', date: '2025/10/12', amount: '15 000', type: 'earned', status: 'Получен' },
-    { id: '#7473545', date: '2025/10/12', amount: '15 000', type: 'earned', status: 'Получен' },
-    { id: '#7473565', date: '2025/09/12', amount: '15 000', type: 'spent', status: 'Потрачен' },
-    { id: '#7473564', date: '2025/09/10', amount: '10 000', type: 'earned', status: 'Получен' },
-  ];
+export default function BonusSection({ balance = 0, transactions = [] }) {
 
   return (
     <div className="space-y-4 sm:space-y-6 w-full">
@@ -41,7 +37,9 @@ export default function BonusSection() {
             </span>
           </div>
           <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-2xl sm:text-3xl md:text-4xl font-bold">30 000</span>
+            <span className="text-2xl sm:text-3xl md:text-4xl font-bold">
+              {balance.toLocaleString()}
+            </span>
             <span className="text-base sm:text-lg font-semibold text-white/90">сум</span>
           </div>
           <p className="text-xs text-white/80">Бонусы с покупок</p>
@@ -72,74 +70,96 @@ export default function BonusSection() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {transactions.map((transaction, index) => {
-                  const isPositive = transaction.type === 'earned';
-                  const Icon = isPositive ? TrendingUp : TrendingDown;
-                  
-                  return (
-                    <TableRow key={index}>
-                      <TableCell className="font-medium">{transaction.id}</TableCell>
-                      <TableCell className="text-muted-foreground">{transaction.date}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Icon className={`w-4 h-4 ${
-                            isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                          }`} />
-                          <span className={`font-semibold ${
-                            isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                          }`}>
-                            {isPositive ? '+' : '-'} {transaction.amount} сум
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={isPositive ? 'success' : 'destructive'}
-                          className="font-medium"
-                        >
-                          {transaction.status}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
+                {transactions.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={4} className="text-center text-muted-foreground">
+                      У вас пока нет бонусных операций.
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  transactions.map((transaction, index) => {
+                    const isPositive = transaction.type === 'earned';
+                    const Icon = isPositive ? TrendingUp : TrendingDown;
+                    
+                    return (
+                      <TableRow key={index}>
+                        <TableCell className="font-medium">{transaction.id}</TableCell>
+                        <TableCell className="text-muted-foreground">{transaction.date}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-2">
+                            <Icon
+                              className={`w-4 h-4 ${
+                                isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                              }`}
+                            />
+                            <span
+                              className={`font-semibold ${
+                                isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                              }`}
+                            >
+                              {isPositive ? '+' : '-'} {transaction.amount} сум
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant={isPositive ? 'success' : 'destructive'}
+                            className="font-medium"
+                          >
+                            {transaction.status}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
+                )}
               </TableBody>
             </Table>
           </div>
 
           {/* Mobile Cards */}
           <div className="md:hidden divide-y divide-border">
-            {transactions.map((transaction, index) => {
-              const isPositive = transaction.type === 'earned';
-              const Icon = isPositive ? TrendingUp : TrendingDown;
-              
-              return (
-                <div key={index} className="p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-sm">{transaction.id}</span>
-                    <Badge 
-                      variant={isPositive ? 'success' : 'destructive'}
-                      className="text-xs"
-                    >
-                      {transaction.status}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-muted-foreground">{transaction.date}</span>
-                    <div className="flex items-center gap-1.5">
-                      <Icon className={`w-4 h-4 ${
-                        isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                      }`} />
-                      <span className={`font-semibold ${
-                        isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        {isPositive ? '+' : '-'} {transaction.amount}
-                      </span>
+            {transactions.length === 0 ? (
+              <p className="text-sm text-muted-foreground p-4">
+                У вас пока нет бонусных операций.
+              </p>
+            ) : (
+              transactions.map((transaction, index) => {
+                const isPositive = transaction.type === 'earned';
+                const Icon = isPositive ? TrendingUp : TrendingDown;
+                
+                return (
+                  <div key={index} className="p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-semibold text-sm">{transaction.id}</span>
+                      <Badge 
+                        variant={isPositive ? 'success' : 'destructive'}
+                        className="text-xs"
+                      >
+                        {transaction.status}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-muted-foreground">{transaction.date}</span>
+                      <div className="flex items-center gap-1.5">
+                        <Icon
+                          className={`w-4 h-4 ${
+                            isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                          }`}
+                        />
+                        <span
+                          className={`font-semibold ${
+                            isPositive ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                          }`}
+                        >
+                          {isPositive ? '+' : '-'} {transaction.amount}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            )}
           </div>
         </CardContent>
       </Card>

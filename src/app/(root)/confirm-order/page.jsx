@@ -1,5 +1,5 @@
 import CustomBackground from '@/components/shared/customBackground'
-import React, { useState } from 'react'
+import React from 'react'
 import famale from "@/assets/background/famale.webp";
 import male from "@/assets/background/male.webp";
 import { cn } from '@/lib/utils';
@@ -11,10 +11,18 @@ import Payment from './_components/payment';
 import Image from 'next/image';
 import Link from 'next/link';
 
+const resolveSearchParams = async (searchParams) => {
+  if (!searchParams) return {};
+  if (typeof searchParams.then === "function") {
+    return await searchParams;
+  }
+  return searchParams;
+};
+
 export default async function ConfirmPage({ searchParams }) {
-  const params = await searchParams; // searchParams ni kutib olish kerak
+  const params = await resolveSearchParams(searchParams);
   const gender = params?.gender;
-  const [success, setSuccess] = useState(false)
+  const success = params?.status === "success";
   
   if (success) {
     return (
@@ -107,7 +115,7 @@ export default async function ConfirmPage({ searchParams }) {
           </div>
           <div className='flex gap-5 md:gap-16 flex-col-reverse md:flex-row'>
             <Payment />
-            <Order />
+            <Order gender={gender} />
           </div>
         </section>
         <section className='containerCustom w-11/12 pt-10 space-y-4'>

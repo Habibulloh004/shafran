@@ -11,7 +11,7 @@ const CustomBackground = ({
   className = "",
   priority = true,
   classNameImage = "",
-  quality = 100,
+  quality = 75,
   type = "multi"
 }) => {
   if (type == "single" && singleImage) {

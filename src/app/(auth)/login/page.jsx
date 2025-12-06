@@ -8,19 +8,26 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { persistAuthCookie, useAuthStore } from "@/store/authStore";
+import ForgotPasswordModal from "@/components/shared/ForgotPasswordModal";
+import { loginUser } from "actions/post";
 
 export default function LoginPage() {
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const setAuth = useAuthStore((state) => state.setAuth);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isForgotModalOpen, setForgotModalOpen] = useState(false);
   const LoginValidation = z.object({
     phone: z
       .string()
       .min(13, { message: "Неверный номер телефона" })
       .max(14, { message: "Неверный номер телефона" }),
-
     password: z
       .string()
-      .min(6, { message: "Password in 6 characters" }),
+      .min(1, { message: "Введите пароль" }),
   });
 
   const form = useForm({
@@ -31,8 +38,37 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = async () => {
+  const onSubmit = async (values) => {
+    try {
+      setErrorMessage("");
+      setIsLoading(true);
 
+      const response = await loginUser({
+        phone: values.phone,
+        password: values.password,
+      });
+      console.log("Login response:", response);
+      if (!response || !response.data.token) {
+        setErrorMessage("Не удалось войти. Проверьте данные.");
+        return;
+      }
+      setAuth(response?.data);
+      router.push("/");
+    } catch (error) {
+      console.error("Login error", error);
+      if (error?.status === 401 || error?.status === 404) {
+        setErrorMessage("Неверный номер телефона или пароль.");
+        return;
+      }
+
+      const message =
+        error?.details?.error?.message ||
+        error?.message ||
+        "Не удалось войти. Попробуйте ещё раз.";
+      setErrorMessage(message);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   return (
@@ -76,14 +112,19 @@ export default function LoginPage() {
                 />
 
                 <CustomFormField
-                  fieldType={FormFieldType.PASSWORDINPUT}
+                  fieldType={FormFieldType.INPUT}
                   control={form.control}
                   name="password"
-                  placeholder={"Enter password"}
+                  placeholder={"Введите пароль"}
                   label={"Пароль"}
+                  inputType="password"
                   inputClass="text-foreground rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
                   disabled={isLoading}
                 />
+
+                {errorMessage && (
+                  <p className="text-sm text-red-400 text-center">{errorMessage}</p>
+                )}
 
                 <div className="w-full flex justify-center items-center flex-col gap-3 sm:gap-4">
                   {/* Submit Button */}
@@ -100,16 +141,26 @@ export default function LoginPage() {
                     {isLoading ? "Submiting..." : "Войти"}
                   </button>
 
-                  {/* Register Link */}
-                  <p className="text-sm sm:text-base text-center text-gray-600">
-                    Нету аккаунта? {" "}
-                    <Link
-                      href="/register"
+                  {/* Links */}
+                  <div className="flex flex-col sm:flex-row gap-2 text-sm sm:text-base text-center text-gray-600">
+                    <button
+                      type="button"
+                      onClick={() => setForgotModalOpen(true)}
                       className="text-blue-600 hover:text-blue-700 hover:underline font-medium transition-colors"
                     >
-                      Регистрация
-                    </Link>
-                  </p>
+                      Забыли пароль?
+                    </button>
+                    <span className="hidden sm:inline">•</span>
+                    <p>
+                      Нет аккаунта?{" "}
+                      <Link
+                        href="/register"
+                        className="text-blue-600 hover:text-blue-700 hover:underline font-medium transition-colors"
+                      >
+                        Регистрация
+                      </Link>
+                    </p>
+                  </div>
                 </div>
               </form>
             </Form>
@@ -128,6 +179,7 @@ export default function LoginPage() {
           />
         </div>
       </main>
+      <ForgotPasswordModal open={isForgotModalOpen} onOpenChange={setForgotModalOpen} />
     </div>
   )
 }

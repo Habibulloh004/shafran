@@ -1,37 +1,38 @@
 "use client";
 
-import React, { useState, useCallback } from 'react';
-import { ChevronDown, MapPin, Wallet, CreditCard, Smartphone, Store, Gift, Check } from 'lucide-react';
+import React, { useCallback /*, useEffect, useMemo */ } from "react";
+import { /* MapPin, */ Wallet, CreditCard, Smartphone, Check } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
-  AccordionTrigger
-} from '@/components/ui/accordion';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { cn } from '@/lib/utils';
+} from "@/components/ui/accordion";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
+import { useOrderStore } from "@/store/orderStore";
+// import { useUserProfileStore } from "@/store/userProfileStore";
+// import { adaptServerAddress } from "@/store/addressStore";
 
-// Memoized CustomRadioItem to prevent unnecessary re-renders
-const CustomRadioItem = React.memo(({ value, currentValue, onChange, icon: Icon, label, children }) => {
-  const isActive = value === currentValue;
+const FIELD_STYLES =
+  "bg-white/95 dark:bg-[#111] border border-black/5 dark:border-white/10 text-sm text-foreground dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-500";
 
-  // Use useCallback to memoize the onChange handler
-  const handleChange = useCallback(() => {
-    onChange(value);
-  }, [onChange, value]);
+const CustomRadioItem = React.memo(
+  ({ value, currentValue, onChange, icon: Icon, label, children }) => {
+    const isActive = value === currentValue;
 
-  return (
-    <div className="">
-      <Accordion type="single" collapsible value={isActive ? value : ''} className="">
+    const handleChange = useCallback(() => {
+      onChange(value);
+    }, [onChange, value]);
+
+    return (
+      <Accordion type="single" collapsible value={isActive ? value : ""}>
         <AccordionItem
           value={value}
           className={cn(
-            "border rounded-none transition-all bg-white dark:bg-[#4B4B4B] border-none",
-            isActive
-              ? "border-primary/20 dark:border-primary"
-              : "border-gray-200"
+            "border border-black/5 dark:border-white/10 rounded-2xl bg-white/95 dark:bg-[#181818] shadow-sm transition-colors",
+            isActive && "ring-1 ring-primary/40 dark:ring-primary/70"
           )}
         >
           <div
@@ -42,139 +43,131 @@ const CustomRadioItem = React.memo(({ value, currentValue, onChange, icon: Icon,
               className={cn(
                 "w-5 h-5 rounded border-2 flex items-center justify-center mr-3 transition-all",
                 isActive
-                  ? "bg-check-active border-check-active dark:bg-check-active dark:border-check-active"
-                  : "border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800"
+                  ? "bg-primary border-primary shadow-[0_0_12px_rgba(120,91,255,0.45)]"
+                  : "border-gray-300 bg-white dark:bg-gray-900 dark:border-gray-700"
               )}
             >
               {isActive && <Check className="w-3 h-3 text-white" strokeWidth={3} />}
             </div>
-            <Label htmlFor={value} className="flex items-center cursor-pointer flex-1">
-              <Icon className={`${isActive ? "text-check-active" : "text-gray-600 dark:text-white"} w-5 h-5 mr-2 `} />
-              <span className={`${isActive ? "text-check-active" : "text-sm dark:text-gray-200"} `}>{label}</span>
+            <Label className="flex items-center cursor-pointer flex-1 text-sm text-gray-800 dark:text-gray-200 font-medium">
+              <Icon
+                className={cn(
+                  "w-5 h-5 mr-2",
+                  isActive
+                    ? "text-primary"
+                    : "text-gray-500 dark:text-gray-400"
+                )}
+              />
+              {label}
             </Label>
-            {isActive && children && <ChevronDown className="w-4 h-4 text-gray-400 dark:text-gray-500" />}
           </div>
           {children && (
-            <AccordionContent className={"pb-0"}>
-              <div className="bg-[#F2F2F296] px-4 py-2">{children}</div>
+            <AccordionContent className="pb-0">
+              <div className="px-4 pb-4 space-y-3 bg-gray-50/90 dark:bg-white/5 border-t border-gray-200 dark:border-white/5 rounded-b-2xl">
+                {children}
+              </div>
             </AccordionContent>
           )}
         </AccordionItem>
       </Accordion>
-    </div>
-  );
-});
+    );
+  }
+);
 
 export default function CheckoutForm() {
-  const [deliveryMethod, setDeliveryMethod] = useState('address');
-  const [paymentMethod, setPaymentMethod] = useState('card');
-  const [selectedAddress, setSelectedAddress] = useState('');
-  const [selectedBranch, setSelectedBranch] = useState('');
-  const [selectedDigitalPayment, setSelectedDigitalPayment] = useState('');
-  const [useBonus, setUseBonus] = useState(true);
-  const [bonusAmount, setBonusAmount] = useState('50000');
-  const [cardNumber, setCardNumber] = useState(''); // Controlled state for card number
-  const [expiry, setExpiry] = useState(''); // Controlled state for expiry
-
-  const addresses = [
-    'Яшнабадский р-н, улица Боткина 5а',
-    'Мирабадский р-н, улица Пушкина 12',
-    'Чиланзарский р-н, улица Катартал 45'
-  ];
-
-  const branches = [
-    'Филиал Юнусабад - ул. Бабура 12',
-    'Филиал Чиланзар - ул. Катартал 34',
-    'Филиал Сергели - ул. Янги Сергели 8'
-  ];
+  const paymentMethod = useOrderStore((state) => state.paymentMethod);
+  const selectedDigitalPayment = useOrderStore((state) => state.selectedDigitalPayment);
+  const useBonus = useOrderStore((state) => state.useBonus);
+  const bonusAmount = useOrderStore((state) => state.bonusAmount);
+  const cardNumber = useOrderStore((state) => state.cardNumber);
+  const expiry = useOrderStore((state) => state.expiry);
+  const setPaymentMethod = useOrderStore((state) => state.setPaymentMethod);
+  const setDigitalPayment = useOrderStore((state) => state.setDigitalPayment);
+  const setUseBonus = useOrderStore((state) => state.setUseBonus);
+  const setBonusAmount = useOrderStore((state) => state.setBonusAmount);
+  const setCardNumber = useOrderStore((state) => state.setCardNumber);
+  const setExpiry = useOrderStore((state) => state.setExpiry);
 
   const digitalPayments = [
-    { id: 'payme', name: 'Payme', color: 'bg-blue-500' },
-    { id: 'click', name: 'Click', color: 'bg-purple-500' },
-    { id: 'uzum', name: 'Uzum', color: 'bg-green-500' }
+    { id: "payme", name: "Payme" },
+    { id: "click", name: "Click" },
+    { id: "uzum", name: "Uzum" },
   ];
 
-  // Handle card number input with formatting
   const handleCardNumberChange = useCallback((e) => {
-    const value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    const value = e.target.value.replace(/\D/g, "");
     const formatted = value
       .slice(0, 16)
-      .replace(/(\d{4})(?=\d)/g, '$1 '); // Add space every 4 digits
+      .replace(/(\d{4})(?=\d)/g, "$1 ");
     setCardNumber(formatted);
-  }, []);
+  }, [setCardNumber]);
 
-  // Handle expiry input with formatting
   const handleExpiryChange = useCallback((e) => {
-    const value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    const value = e.target.value.replace(/\D/g, "");
     if (value.length <= 4) {
-      const formatted = value.replace(/(\d{2})(?=\d)/, '$1/');
+      const formatted = value.replace(/(\d{2})(?=\d)/, "$1/");
       setExpiry(formatted);
     }
-  }, []);
+  }, [setExpiry]);
 
   return (
-    <main className='flex-1 flex flex-col justify-start items-start'>
-      <div className="w-full max-w-xl bg-transparent dark:bg-[#4B4B4B] rounded-lg">
-        {/* Delivery Method */}
-        <div className="">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 px-4 pt-4">Способ доставки</h3>
-
-          <div>
-            <CustomRadioItem
-              value="address"
-              currentValue={deliveryMethod}
-              onChange={setDeliveryMethod}
-              icon={MapPin}
-              label="Адрес доставки"
-            >
-              <div className="space-y-2">
-                <p className="text-xs text-gray-500 dark:text-black/90 mb-2">Выберите адрес:</p>
-                {addresses.map((address, idx) => (
-                  <div key={idx} className="flex items-center space-x-2">
+    <main className="flex-1 flex flex-col justify-start items-start">
+      <div className="w-full max-w-xl bg-white/95 dark:bg-[#090909]/85 border border-black/5 dark:border-white/10 rounded-2xl shadow-[0_25px_60px_rgba(0,0,0,0.15)]">
+        {/* TODO: Restore address feature when branches & delivery are enabled */}
+        {/* 
+        // --- ADDRESS BACKUP START ---
+        <div className="px-4 pt-4">
+          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3 flex items-center gap-2">
+            <MapPin className="w-4 h-4 text-primary" />
+            Адрес доставки
+          </h3>
+          <div className="space-y-3">
+            {addresses.length ? (
+              addresses.map((address, idx) => {
+                const addressId = address.id || `addr-${idx}`;
+                return (
+                  <label
+                    key={addressId}
+                    className={cn(
+                      "flex items-start gap-3 p-3 rounded-2xl border border-black/5 dark:border-white/10 bg-white/95 dark:bg-[#181818] shadow-sm cursor-pointer transition-colors",
+                      isAddressSelected(address) &&
+                        "ring-1 ring-primary/40 dark:ring-primary/70"
+                    )}
+                  >
                     <Checkbox
-                      id={`addr-${idx}`}
-                      checked={selectedAddress === address}
-                      onCheckedChange={(checked) => checked && setSelectedAddress(address)}
+                      id={`addr-${addressId}`}
+                      checked={isAddressSelected(address)}
+                      onCheckedChange={(checked) =>
+                        checked && setSelectedAddress(address)
+                      }
                     />
-                    <Label htmlFor={`addr-${idx}`} className="text-sm cursor-pointer dark:text-black/60">
-                      {address}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </CustomRadioItem>
-
-            <CustomRadioItem
-              value="pickup"
-              currentValue={deliveryMethod}
-              onChange={setDeliveryMethod}
-              icon={Store}
-              label="Самовывоз"
-            >
-              <div className="space-y-2">
-                <p className="text-xs text-gray-500 dark:text-black mb-2">Выберите филиал:</p>
-                {branches.map((branch, idx) => (
-                  <div key={idx} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`branch-${idx}`}
-                      checked={selectedBranch === branch}
-                      onCheckedChange={(checked) => checked && setSelectedBranch(branch)}
-                    />
-                    <Label htmlFor={`branch-${idx}`} className="text-sm cursor-pointer dark:text-black/60">
-                      {branch}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </CustomRadioItem>
+                    <div className="space-y-1">
+                      <p className="text-sm font-semibold text-gray-800 dark:text-gray-100">
+                        {address.label || "Адрес"}
+                      </p>
+                      <p className="text-xs text-gray-600 dark:text-gray-300">
+                        {address.fullAddress || address.value || "Без адреса"}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Нет сохранённых адресов. Добавьте адрес в профиле.
+              </p>
+            )}
           </div>
         </div>
+        // --- ADDRESS BACKUP END ---
+        */}
+        <div className="px-4 pt-4 pb-2" />
 
-        {/* Payment Method */}
-        <div className="pt-4">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Способ оплаты</h3>
-
-          <div>
+        <div className="px-4 pt-6">
+          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">
+            Способ оплаты
+          </h3>
+          <div className="space-y-3">
             <CustomRadioItem
               value="cash"
               currentValue={paymentMethod}
@@ -192,29 +185,35 @@ export default function CheckoutForm() {
             >
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="cardNumber" className="text-xs text-gray-600 ">
+                  <Label
+                    htmlFor="cardNumber"
+                    className="text-xs text-gray-600 dark:text-gray-300"
+                  >
                     Номер карты
                   </Label>
                   <Input
                     id="cardNumber"
                     value={cardNumber}
                     onChange={handleCardNumberChange}
+                    inputMode="numeric"
                     placeholder="1234 1234 1234 1234"
-                    className="text-black p-0 leading-0.5 h-auto focus-visible:border-none focus-visible:ring-0 focus:ring-0 border-0 shadow-none rounded-none mt-1  dark:placeholder:text-gray-500"
-                    maxLength={19}
+                    className={FIELD_STYLES}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="expiry" className="text-xs text-gray-600 ">
+                  <Label
+                    htmlFor="expiry"
+                    className="text-xs text-gray-600 dark:text-gray-300"
+                  >
                     Дата окончания
                   </Label>
                   <Input
                     id="expiry"
                     value={expiry}
                     onChange={handleExpiryChange}
+                    inputMode="numeric"
                     placeholder="MM/YY"
-                    className="text-black text-xs p-0 w-16 mt-1  dark:placeholder:text-gray-500 leading-0.5 h-auto focus-visible:border-none focus-visible:ring-0 focus:ring-0 border-0 shadow-none rounded-none"
-                    maxLength={5}
+                    className={FIELD_STYLES}
                   />
                 </div>
               </div>
@@ -225,81 +224,48 @@ export default function CheckoutForm() {
               currentValue={paymentMethod}
               onChange={setPaymentMethod}
               icon={Smartphone}
-              label="Payme, Click, Uzum"
+              label="Цифровые кошельки"
             >
               <div className="space-y-2">
-                <p className="text-xs text-gray-500 dark:text-black/90 mb-3">Выберите платежную систему:</p>
-                <div className="space-y-2">
-                  {digitalPayments.map((payment) => (
-                    <div key={payment.id} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={`payment-${payment.id}`}
-                        checked={selectedDigitalPayment === payment.id}
-                        onCheckedChange={(checked) => checked && setSelectedDigitalPayment(payment.id)}
-                      />
-                      <Label
-                        htmlFor={`payment-${payment.id}`}
-                        className="flex items-center cursor-pointer flex-1"
-                      >
-                        <div
-                          className={cn(
-                            "w-10 h-10 rounded-lg flex items-center justify-center text-white font-bold text-xs mr-3",
-                            payment.color
-                          )}
-                        >
-                          {payment.name.slice(0, 2).toUpperCase()}
-                        </div>
-                        <span className="text-sm font-medium dark:text-white/60">{payment.name}</span>
-                      </Label>
-                    </div>
-                  ))}
-                </div>
+                {digitalPayments.map((provider) => (
+                  <label
+                    key={provider.id}
+                    className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200"
+                  >
+                    <Checkbox
+                      id={`pay-${provider.id}`}
+                      checked={selectedDigitalPayment === provider.id}
+                      onCheckedChange={(checked) =>
+                        checked && setDigitalPayment(checked ? provider.id : "")
+                      }
+                    />
+                    {provider.name}
+                  </label>
+                ))}
               </div>
             </CustomRadioItem>
           </div>
         </div>
 
-        {/* Bonus */}
-        <div
-          className={cn(
-            "border-none bg-white rounded-none p-4 transition-all",
-            useBonus && "border-primary/10 dark:border-primary"
+        <div className="px-4 pt-6 pb-6 space-y-3">
+          <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
+            <Checkbox
+              checked={useBonus}
+              onCheckedChange={setUseBonus}
+              id="bonus-toggle"
+            />
+            Использовать бонус
+          </label>
+          {useBonus && (
+            <Input
+              value={bonusAmount}
+              onChange={(e) => setBonusAmount(e.target.value)}
+              className={FIELD_STYLES}
+              placeholder="Сумма бонуса"
+            />
           )}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Checkbox
-                id="bonus"
-                checked={useBonus}
-                onCheckedChange={setUseBonus}
-              />
-              <Label htmlFor="bonus" className="ml-2 flex items-center cursor-pointer">
-                <Gift className="w-5 h-5 mr-2 text-gray-600 dark:text-white" />
-                <span className="text-sm">Использовать бонус</span>
-              </Label>
-            </div>
-            {useBonus && (
-              <div className='flex justify-end items-center gap-2'>
-                <Input
-                  type="text"
-                  value={bonusAmount}
-                  onChange={(e) => setBonusAmount(e.target.value)}
-                  className="h-auto p-0 shadow-none focus-visible:ring-0 focus-visible:border-none border-none rounded-none w-28 text-right dark:text-white/60 dark:placeholder:text-white/60"
-                  placeholder="50 000"
-                /> <span className="text-sm text-gray-600 dark:text-white/60"> сум</span>
-              </div>
-            )}
-            {!useBonus && (
-              <span className="text-sm text-gray-600 dark:text-white/60">{bonusAmount} сум</span>
-            )}
-          </div>
         </div>
-
       </div>
-      {/* Submit Button */}
-      <button className="max-w-xl w-full mt-6 bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors">
-        Оформить заказ
-      </button>
     </main>
   );
 }

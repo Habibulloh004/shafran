@@ -40,6 +40,7 @@ const RenderInput = ({ field, className, props, rules }) => {
       return (
         <FormControl>
           <Input
+            type={props.inputType || "text"}
             placeholder={props.placeholder}
             {...field}
             value={field.value || ""}

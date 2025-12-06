@@ -1,33 +1,143 @@
-"use client"
+"use client";
 
-import { Price } from '@/lib/functions'
-import Image from 'next/image'
-import React from 'react'
-import StarRating from './StarRating'
-import { Button } from '../ui/button'
-import { Plus } from 'lucide-react'
-import Link from 'next/link'
+import { Price } from "@/lib/functions";
+import Image from "next/image";
+import React, { useMemo } from "react";
+import StarRating from "./StarRating";
+import { Button } from "../ui/button";
+import { Plus } from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
+import { collectGalleryItems, resolveHeroImage } from "@/lib/media";
+import { useOrderStore } from "@/store/orderStore";
 
-export default function ProductItem() {
+const FALLBACK_IMAGE = "/img/res1.webp";
+
+export default function ProductItem({
+  product,
+  className = "",
+  section,
+  genderParam,
+  categoryIdOverride,
+}) {
+  const {
+    id,
+    name,
+    slug,
+    rating_average: rating = 0,
+    rating_count: ratingCount = 0,
+  } = product || {};
+
+  const categoryFromProduct =
+    product?.category ||
+    (Array.isArray(product?.categories) ? product.categories[0] : null) ||
+    null;
+
+  const gender =
+    genderParam ||
+    product?.gender_audience ||
+    categoryFromProduct?.gender_audience ||
+    product?.gender ||
+    null;
+
+  const price =
+    product?.price?.amount ??
+    product?.base_price ??
+    product?.shop_prices?.[0]?.retail_price ??
+    0;
+  const currency =
+    product?.price?.currency ??
+    product?.currency ??
+    product?.shop_prices?.[0]?.retail_currency ??
+    "USD";
+
+  const imageUrl = useMemo(() => {
+    if (!product) return FALLBACK_IMAGE;
+    const gallery = collectGalleryItems(product);
+    return resolveHeroImage(product, gallery);
+  }, [product]);
+
+  const addItem = useOrderStore((state) => state.addItem);
+
+  const handleAddToCart = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (product) {
+      addItem(product, { quantity: 1 });
+    }
+  };
+
+  const categoryId =
+    categoryIdOverride ||
+    categoryFromProduct?.id ||
+    product?.category_id ||
+    null;
+  const productId = id;
+
+  const query = new URLSearchParams();
+  if (section) {
+    query.set("section", section);
+  }
+
+  if (gender) {
+    query.set("gender", gender);
+  }
+
+  const queryString = query.toString();
+
+  const href =
+    categoryId && productId
+      ? `/category/${categoryId}/product/${productId}${
+          queryString ? `?${queryString}` : ""
+        }`
+      : "#";
+
   return (
-    <Link href="/category/12/product/12" className='text-primary bg-white/60 dark:bg-black/60 rounded-[20px] overflow-hidden w-auto flex flex-col'>
-      <div className='bg-white/60 dark:bg-black/60 relative w-auto h-28 md:h-36'>
-        <Image src="/background/creed.webp" className='object-contain p-2' alt="img" fill quality={100} />
+    <Link
+      href={href}
+      className={cn(
+        "text-primary bg-white/60 dark:bg-black/60 rounded-[20px] overflow-hidden w-auto flex flex-col transition-all hover:-translate-y-1 hover:shadow-lg dark:hover:shadow-primary/30",
+        className,
+        href === "#" && "pointer-events-none opacity-70"
+      )}
+      prefetch={false}
+    >
+      <div className="bg-white/60 dark:bg-black/60 relative w-auto h-32 md:h-40">
+        <Image
+          src={imageUrl}
+          alt={name || "Product"}
+          fill
+          quality={90}
+          className="object-cover"
+          sizes="(max-width: 768px) 50vw, 25vw"
+        />
       </div>
-      <div className='backdrop-blur-2xl px-4 py-3 space-y-2'>
-        <div>
-          <p className='text-[10px] line-clamp-1 md:text-xs text-primary dark:text-white/40'>Для него</p>
-          <h1 className='text-xs line-clamp-2 md:text-md lg:text-xl font-bold'>Creed - silver mountain water</h1>
-          <StarRating readOnly value={3} onChange={(val) => console.log("Rating:", val)} />
+      <div className="backdrop-blur-2xl px-4 py-3 space-y-2">
+        <div className="space-y-1">
+          {gender && (
+            <p className="text-[10px] uppercase tracking-wide line-clamp-1 md:text-xs text-primary dark:text-white/60">
+              {gender === "male"
+                ? "Для него"
+                : gender === "female"
+                ? "Для неё"
+                : "Унисекс"}
+            </p>
+          )}
+          <h1 className="text-xs line-clamp-2 md:text-sm lg:text-base font-semibold text-foreground dark:text-white">
+            {name || slug || "Без названия"}
+          </h1>
         </div>
         <div className="flex justify-between items-center gap-3">
-          <Price amount={490} />
-          <Button className={"w-6 h-6 md:h-10 md:w-10 rounded-full hover:opacity-70 transition-all ease-linear duration-200 cursor-pointer bg-primary text-white"}>
-            <Plus className='' />
+          <Price amount={price} currency={currency} />
+          <Button
+            type="button"
+            onClick={handleAddToCart}
+            className="w-7 h-7 md:h-10 md:w-10 rounded-full hover:opacity-70 transition-all ease-linear duration-200 cursor-pointer bg-primary text-white"
+          >
+            <Plus className="w-4 h-4" />
           </Button>
         </div>
-
       </div>
     </Link>
-  )
+  );
 }

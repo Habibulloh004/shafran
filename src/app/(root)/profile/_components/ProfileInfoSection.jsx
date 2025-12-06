@@ -1,89 +1,214 @@
-import React from 'react';
-import { User, Phone, Home, Lock, Edit2 } from 'lucide-react';
+'use client';
+
+import React, { useEffect, useMemo, useState, useTransition } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { Loader2, User, Phone, Users } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { updateProfileDetails } from '../actions';
+import { useRouter } from 'next/navigation';
+import ForgotPasswordModal from '@/components/shared/ForgotPasswordModal';
 
-const InputField = ({ icon: Icon, label, value, type = 'text', onEdit }) => (
-  <div className="space-y-2">
-    <Label htmlFor={label} className="text-sm font-medium">
-      {label}
-    </Label>
-    <div className="relative flex items-center">
-      <Icon className="absolute left-3 w-5 h-5 text-muted-foreground pointer-events-none" />
-      <Input
-        id={label}
-        type={type}
-        value={value}
-        readOnly
-        className="pl-10 pr-12 bg-background"
-      />
-      <Button
-        size="icon"
-        variant="ghost"
-        className="absolute right-1 h-8 w-8 text-primary hover:bg-primary/10"
-        onClick={onEdit}
-      >
-        <Edit2 className="w-4 h-4" />
-      </Button>
-    </div>
-  </div>
-);
+export default function ProfileInfoSection({ profile = {} }) {
+  const router = useRouter();
+  const [isForgotModalOpen, setForgotModalOpen] = useState(false);
+  const [status, setStatus] = useState(null);
+  const [isPending, startTransition] = useTransition();
 
-export default function ProfileInfoSection() {
-  const handleEdit = (field) => {
-    console.log(`Edit ${field}`);
+  const initialForm = useMemo(
+    () => ({
+      first_name: profile?.first_name || "",
+      last_name: profile?.last_name || "",
+      phone_number:
+        profile?.phone_number ||
+        profile?.phone_numbers?.[0] ||
+        "",
+      gender: profile?.gender
+    }),
+    [profile]
+  );
+  console.log({ profile })
+  const [formData, setFormData] = useState(initialForm);
+
+  useEffect(() => {
+    setFormData(initialForm);
+  }, [initialForm]);
+
+  const normalizeGender = (gender) => {
+    if (!gender) return "";
+    return gender.toUpperCase();
+  };
+
+  const handleChange = (field) => (event) => {
+    const value = event.target.value;
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const hasChanges = useMemo(
+    () =>
+      Object.keys(initialForm).some(
+        (key) => (formData[key] || "") !== (initialForm[key] || "")
+      ),
+    [formData, initialForm]
+  );
+
+  const showMessage = (type, message) => {
+    setStatus({ type, message });
+    setTimeout(() => setStatus(null), 4000);
+  };
+
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    if (!hasChanges) return;
+    setStatus(null);
+
+    startTransition(async () => {
+      const result = await updateProfileDetails(formData);
+      if (result?.success) {
+        showMessage("success", "Профиль обновлён.");
+        router.refresh();
+      } else {
+        showMessage("error", result?.error || "Не удалось сохранить изменения.");
+      }
+    });
+  };
+
+  const handleReset = () => {
+    setFormData(initialForm);
+    setStatus(null);
   };
 
   return (
     <div className="space-y-4 w-full">
-      <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground">Профиль</h2>
-        <p className="text-sm text-muted-foreground mt-1 hidden sm:block">
-          Управляйте своей персональной информацией
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Профиль</h2>
+          <p className="text-sm text-muted-foreground mt-1">
+            Обновите личную информацию
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="ghost"
+          className="text-sm text-blue-600 hover:text-blue-700 hover:bg-transparent"
+          onClick={() => setForgotModalOpen(true)}
+        >
+          Забыли пароль?
+        </Button>
       </div>
-      
+
       <Card className="border-border/50 shadow-sm">
         <CardHeader className="pb-4 space-y-1">
           <CardTitle className="text-base sm:text-lg">Личная информация</CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            Обновите свои личные данные
+            Измените данные и сохраните их на Billz и нашем сервере
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-            <InputField
-              icon={User}
-              label="Имя"
-              value="Имя фамилия"
-              onEdit={() => handleEdit('name')}
-            />
-            <InputField
-              icon={Phone}
-              label="Номер телефона"
-              value="+998 99 999-99-99"
-              onEdit={() => handleEdit('phone')}
-            />
-            <div className="sm:col-span-2">
-              <InputField
-                icon={Home}
-                label="Адрес"
-                value="Яшнабадский рй. улица Ботки..."
-                onEdit={() => handleEdit('address')}
-              />
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="first_name" className="flex items-center gap-2 text-sm font-medium">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  Имя
+                </Label>
+                <Input
+                  id="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange("first_name")}
+                  placeholder="Имя"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last_name" className="flex items-center gap-2 text-sm font-medium">
+                  <User className="w-4 h-4 text-muted-foreground" />
+                  Фамилия
+                </Label>
+                <Input
+                  id="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange("last_name")}
+                  placeholder="Фамилия"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone_number" className="flex items-center gap-2 text-sm font-medium">
+                  <Phone className="w-4 h-4 text-muted-foreground" />
+                  Телефон
+                </Label>
+                <Input
+                  id="phone_number"
+                  value={formData.phone_number}
+                  onChange={handleChange("phone_number")}
+                  placeholder="+998 90 123 45 67"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="gender" className="flex items-center gap-2 text-sm font-medium">
+                  <Users className="w-4 h-4 text-muted-foreground" />
+                  Пол
+                </Label>
+                <Select
+                  value={normalizeGender(formData.gender)}
+                  onValueChange={(value) => setFormData((prev) => ({ ...prev, gender: value }))}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Выберите пол" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="MALE">Мужской</SelectItem>
+                    <SelectItem value="FEMALE">Женский</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <InputField
-              icon={Lock}
-              label="Пароль"
-              value="••••••••••••"
-              type="password"
-              onEdit={() => handleEdit('password')}
-            />
-          </div>
+
+            {status && (
+              <p
+                className={`text-sm ${status.type === "success" ? "text-green-600" : "text-red-500"
+                  }`}
+              >
+                {status.message}
+              </p>
+            )}
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button
+                type="submit"
+                disabled={!hasChanges || isPending}
+                className="flex-1 sm:flex-none"
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    Сохраняем...
+                  </>
+                ) : (
+                  "Сохранить изменения"
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={!hasChanges || isPending}
+                onClick={handleReset}
+                className="flex-1 sm:flex-none"
+              >
+                Отменить
+              </Button>
+            </div>
+          </form>
         </CardContent>
       </Card>
+      <ForgotPasswordModal open={isForgotModalOpen} onOpenChange={setForgotModalOpen} />
     </div>
   );
 }

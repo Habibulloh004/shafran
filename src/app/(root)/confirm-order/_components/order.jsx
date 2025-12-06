@@ -1,39 +1,209 @@
-import { File } from 'lucide-react'
+'use client';
+
 import Image from 'next/image'
-import React from 'react'
+import React, { useCallback, useMemo, useState, useTransition } from 'react'
+import { useOrderStore, computeOrderTotals } from '@/store/orderStore'
+import { useAuthStore } from '@/store/authStore'
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
+import { createOrder } from 'actions/post';
+import { useProfileStore } from '@/store/profileStore';
 
-export default function Order() {
+export default function Order({ gender = null }) {
+  const items = useOrderStore((state) => state.items)
+  const clearCart = useOrderStore((state) => state.clearCart)
+  const resetCheckout = useOrderStore((state) => state.resetCheckout)
+  const totals = useMemo(() => computeOrderTotals(items), [items])
+
+  const deliveryMethod = useOrderStore((state) => state.deliveryMethod)
+  const paymentMethod = useOrderStore((state) => state.paymentMethod)
+  const selectedDigitalPayment = useOrderStore((state) => state.selectedDigitalPayment)
+  const useBonus = useOrderStore((state) => state.useBonus)
+  const bonusAmount = useOrderStore((state) => state.bonusAmount)
+  const language = useOrderStore((state) => state.language)
+  const setOrders = useProfileStore((state) => state.setOrders)
+  const orders = useProfileStore((state) => state.orders)
+  const checkoutState = useMemo(
+    () => ({
+      deliveryMethod,
+      paymentMethod,
+      selectedDigitalPayment,
+      useBonus,
+      bonusAmount,
+      language,
+    }),
+    [deliveryMethod, paymentMethod, selectedDigitalPayment, useBonus, bonusAmount, language]
+  )
+
+  const user = useAuthStore((state) => state.user)
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+
+  // Login dialog state
+  const [isLoginDialogOpen, setLoginDialogOpen] = useState(false)
+
+  // Error dialog state
+  const [errorDialogOpen, setErrorDialogOpen] = useState(false)
+  const [errorMessage, setErrorMessage] = useState("")
+
+  const handleSubmit = useCallback(() => {
+    if (!user?.id) {
+      setLoginDialogOpen(true)
+      return
+    }
+    console.log("[checkout] submitting order...", { items, checkoutState, totals, user })
+    startTransition(async () => {
+      const result = await createOrder({
+        items,
+        checkout: checkoutState,
+        totals,
+        user,
+      })
+      console.log("[checkout] order submission result:", result)
+      if (!result?.success) {
+        setErrorMessage(result?.error || "Не удалось оформить заказ.")
+        setErrorDialogOpen(true)
+        return
+      }
+      setOrders([...orders, result.data])
+      clearCart()
+      resetCheckout()
+
+      const nextParams = new URLSearchParams()
+      nextParams.set("status", "success")
+      if (gender) {
+        nextParams.set("gender", gender)
+      }
+      router.push(`/confirm-order?${nextParams.toString()}`)
+    })
+  }, [user, items, totals, checkoutState, clearCart, resetCheckout, router, gender])
+
+  const handleLoginRedirect = useCallback(() => {
+    setLoginDialogOpen(false)
+    router.push('/login')
+  }, [router])
+
   return (
-    <div className='flex-1'>
-      <div className='relative flex flex-col justify-center items-center pt-3 overflow-y-visible overflow-x-hidden max-w-xl w-full'>
-        <div className='bg-[#C7DAE1] dark:bg-[#DDEBF5B2] w-full rounded-lg'>
-          <div className='min-h-48 md:min-h-[400px] max-w-xl w-full backdrop-blur-2xl p-5 rounded-t-2xl'>
-            <h1 className='text-primary dark:text-gray-600 text-lg md:text-xl font-normal mb-5'>
-              Корзина
-            </h1>
-            <div className='max-h-48 md:max-h-[300px] overflow-y-scroll custom-scroll w-11/12 px-3 py-2 rounded-md mx-auto dark:bg-[#C7DAE1] bg-[#DDEBF5B2] flex flex-col gap-3'>
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9,10,11,12,13,14]?.map((item) => (
-                <div className='flex justify-between items-center gap-3' key={item}>
-                  <h1 className='text-gray-500'>Dior SAUVAGE</h1>
-                  <p className='text-gray-800'>1050$</p>
+    <>
+      <div className='flex-1'>
+        <div className='relative flex flex-col justify-center items-center pt-3 overflow-visible max-w-xl w-full'>
+          <div className='w-full rounded-2xl bg-white/95 dark:bg-[#0b0b0b]/90 border border-black/5 dark:border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.15)]'>
+            <div className='min-h-48 md:min-h-[380px] max-w-xl w-full p-5 rounded-t-2xl space-y-4'>
+              <div className='flex items-center justify-between'>
+                <div>
+                  <h1 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>Корзина</h1>
+                  <p className='text-sm text-muted-foreground'>
+                    {items.length} товаров · {totals.amount.toLocaleString()} {totals.currency}
+                  </p>
                 </div>
-              ))}
+                <Image src="/icons/file.svg" width={46} height={46} alt="file" className='opacity-70 dark:opacity-90' />
+              </div>
+              <div className='max-h-48 md:max-h-[260px] overflow-y-auto custom-scroll rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#161616]'>
+                {items.length === 0 ? (
+                  <p className='text-sm text-muted-foreground text-center py-6'>Корзина пуста</p>
+                ) : (
+                  <div className="divide-y divide-gray-100 dark:divide-white/10">
+                    {items.map((item) => (
+                      <div className='flex justify-between items-center gap-3 px-4 py-3' key={item.key}>
+                        <div className='flex items-start gap-2 min-w-0 flex-1'>
+                          <span className='text-xs font-bold text-primary dark:text-primary/90 mt-0.5 shrink-0'>
+                            {item.quantity}x
+                          </span>
+                          <div className='min-w-0'>
+                            <h1 className='text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-1'>
+                              {item.name}
+                            </h1>
+                            {item.variantLabel && (
+                              <span className='text-xs text-primary'>{item.variantLabel}</span>
+                            )}
+                          </div>
+                        </div>
+                        <p className='text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap'>
+                          {(item.price * item.quantity).toLocaleString()} {item.currency}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-          <div className='relative before:absolute before:-top-5 before:-left-5 before:w-10 before:bg-white before:h-10 before:rounded-full before:z-10 after:absolute after:-top-5 after:-right-5 after:w-10 after:bg-white after:h-10 after:rounded-full after:z-10 max-w-xl w-full' >
-            <div class="w-full h-0 opacity-100 border border-dashed  border-primary [border-image:repeating-linear-gradient(90deg,black_0,black_8px,transparent_8px,transparent_16px)_1]"></div>
-          </div>
+            <div className='border-t border-dashed border-gray-300 dark:border-white/15 mx-5'></div>
 
-          <div className='flex justify-between items-center gap-3 max-w-xl w-full backdrop-blur-2xl p-5 rounded-b-2xl'>
-            <div>
-              <h1 className='text-lg text-primary dark:text-gray-600'>Общая сумма</h1>
-              <p className='text-3xl text-primary dark:text-gray-600'>$ 2110</p>
+            <div className='flex justify-between items-center gap-3 max-w-xl w-full p-5 rounded-b-2xl'>
+              <div>
+                <h1 className='text-lg text-gray-700 dark:text-gray-300'>Общая сумма</h1>
+                <p className='text-3xl text-primary dark:text-white font-bold'>
+                  {totals.amount.toLocaleString()} {totals.currency}
+                </p>
+              </div>
+              <div className='text-sm text-muted-foreground text-right'>
+                <p className='text-xs text-gray-500 dark:text-gray-400'>Количество</p>
+                <p className='text-base font-semibold text-gray-800 dark:text-gray-100'>{totals.quantity}</p>
+              </div>
             </div>
-            <Image src="/icons/file.svg" width={50} height={50} alt="file" />
           </div>
+          <Button
+            className='mt-4 w-full max-w-xl h-12 text-base rounded-2xl font-semibold'
+            disabled={isPending}
+            onClick={handleSubmit}
+          >
+            {isPending ? "Отправляем..." : "Оформить заказ"}
+          </Button>
+          <div className='absolute -z-10 w-24 h-6 bg-black/20 dark:bg-white/10 rounded-md -top-0 left-auto right-auto blur-md' />
         </div>
-        <div className='absolute -z-10 w-24 h-6 bg-[#858585] rounded-md -top-0 left-auto right-auto' />
       </div>
-    </div>
+
+      {/* Login Required Dialog */}
+      <Dialog open={isLoginDialogOpen} onOpenChange={setLoginDialogOpen}>
+        <DialogContent className="w-full max-w-md rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-[#111]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Требуется авторизация
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-700 dark:text-gray-300 py-4">
+            Для оформления заказа необходимо войти в аккаунт.
+          </p>
+          <DialogFooter className="flex flex-col gap-2 sm:flex-row">
+            <Button
+              variant="outline"
+              onClick={() => setLoginDialogOpen(false)}
+              className="w-full sm:w-auto h-11 rounded-xl font-semibold"
+            >
+              Отмена
+            </Button>
+            <Button
+              onClick={handleLoginRedirect}
+              className="w-full sm:w-auto h-11 rounded-xl font-semibold"
+            >
+              Войти
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Error Dialog */}
+      <Dialog open={errorDialogOpen} onOpenChange={setErrorDialogOpen}>
+        <DialogContent className="w-full max-w-md rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-[#111]">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Ошибка оформления заказа
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-700 dark:text-gray-300 py-4">
+            {errorMessage}
+          </p>
+          <DialogFooter>
+            <Button
+              onClick={() => setErrorDialogOpen(false)}
+              className="w-full h-11 rounded-xl font-semibold"
+            >
+              Понятно
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }
