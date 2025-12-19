@@ -15,7 +15,10 @@ const BILLZ_PLATFORM_ID = process.env.BILLZ_PLATFORM_ID || "1";
  * Proxy request to Billz API
  */
 async function proxyToBillz(request, path) {
-  const url = `${BILLZ_API_URL}/${path}`;
+  // Query parametrlarini olish va Billz URL ga qo'shish
+  const requestUrl = new URL(request.url);
+  const queryString = requestUrl.search;
+  const url = `${BILLZ_API_URL}/${path}${queryString}`;
 
   console.log(`\n[BILLZ PROXY] ${request.method} ${url}`);
 

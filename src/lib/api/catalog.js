@@ -1,9 +1,14 @@
 
 import { apiGet } from "./client";
 
-export async function getCategories(params) {
+export async function getCategories(params = {}) {
   return apiGet("/api/billz/v2/category", {
-    params,
+    params: {
+      page: 1,
+      limit: 100,
+      is_deleted: false,
+      ...params,
+    },
     revalidate: 600,
     tags: ["categories"],
   });
@@ -128,9 +133,13 @@ export async function getCategoryDetail(id, params) {
   return null;
 }
 
-export async function getBrands(params) {
-  return apiGet("/api/billz/v2/brands", {
-    params,
+export async function getBrands(params = {}) {
+  return apiGet("/api/billz/v2/brand", {
+    params: {
+      page: 1,
+      limit: 100,
+      ...params,
+    },
     revalidate: 1800,
     tags: ["brands"],
   });

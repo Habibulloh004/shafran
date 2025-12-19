@@ -1,9 +1,8 @@
 import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
-import Header from "@/components/shared/header";
 import { Montserrat_Alternates } from "next/font/google"
-import Footer from "@/components/shared/footer";
+import MainLayout from "@/components/shared/MainLayout";
 
 const montserratAlt = Montserrat_Alternates({
   subsets: ["latin"],
@@ -47,9 +46,9 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          <Header />
-          {children}
-          <Footer />
+          <MainLayout>
+            {children}
+          </MainLayout>
         </ThemeProvider>
       </body>
     </html>

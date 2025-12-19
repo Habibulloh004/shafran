@@ -1,1 +1,1 @@
-export const AUTH_COOKIE = "shafran_token";
+export const AUTH_COOKIE = "user-token";

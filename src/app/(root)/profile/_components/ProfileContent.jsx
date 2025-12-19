@@ -21,7 +21,6 @@ const CONTENT_SECTIONS = {
 export default function ProfileContent({
   activeTab,
   profile,
-  orders = [],
   /* addresses = [], */
   bonus = { balance: 0, transactions: [] },
 }) {
@@ -62,7 +61,7 @@ export default function ProfileContent({
 
   const propsByTab = {
     profile: { profile },
-    orders: { orders },
+    orders: {},
     bonus,
     // --- ADDRESS BACKUP START ---
     // addresses: { addresses: normalizedAddresses, profile },

@@ -52,17 +52,26 @@ const findProductById = (payload, id) => {
   return null;
 };
 
-export async function getProducts(params) {
+export async function getProducts(params = {}) {
+  // Billz API uchun default pagination
+  const queryParams = {
+    page: 1,
+    limit: 24,
+    ...params,
+  };
+
   const attemptChain = [
+    // Billz API - /v2/products (plural - to'g'ri endpoint)
     () =>
       apiGet("/api/billz/v2/products", {
-        params,
+        params: queryParams,
         revalidate: 300,
         tags: ["products"],
       }),
+    // Backend API fallback
     () =>
       apiGet("/api/products", {
-        params,
+        params: queryParams,
         revalidate: 300,
         tags: ["products"],
       }),
@@ -90,28 +99,27 @@ export async function getProducts(params) {
 }
 
 export async function getProductDetail(id, params) {
-  const detailParams = {
-    ...(params || {}),
-    revalidate: 900,
-    tags: [`product:${id}`],
-  };
-
+  // Birinchi navbatda barcha productlardan qidiramiz (chunki /v2/products/{id} ishlamaydi)
   const attemptChain = [
-    () => apiGet(`/api/billz/v2/products/${id}`, detailParams),
+    // Billz API - barcha productlarni olib ichidan topish
     () =>
       apiGet("/api/billz/v2/products", {
         params: {
+          page: 1,
+          limit: 100,
           ...(params || {}),
-          product_id: id,
-          id,
         },
         revalidate: 900,
         tags: [`product:${id}`],
       }),
-    () => apiGet(`/api/products/${id}`, detailParams),
+    // Backend API fallback
+    () =>
+      apiGet(`/api/products/${id}`, {
+        ...(params || {}),
+        revalidate: 900,
+        tags: [`product:${id}`],
+      }),
   ];
-
-  let lastNotFoundError = null;
 
   for (const attempt of attemptChain) {
     try {
@@ -122,7 +130,6 @@ export async function getProductDetail(id, params) {
       }
     } catch (error) {
       if (error?.status === 404) {
-        lastNotFoundError = error;
         continue;
       }
 
@@ -130,10 +137,6 @@ export async function getProductDetail(id, params) {
         throw error;
       }
     }
-  }
-
-  if (lastNotFoundError) {
-    throw lastNotFoundError;
   }
 
   return null;

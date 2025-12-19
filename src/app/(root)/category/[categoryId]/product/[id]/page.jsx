@@ -8,7 +8,7 @@ import { Marquee } from "@/components/ui/marquee";
 import Image from "next/image";
 import ProductItem from "@/components/shared/productItem";
 import ProductDetails from "./_components/ProductDetails";
-import { getProductDetail } from "@/lib/api";
+import { getBillzProduct } from "../../../../../../../actions/get";
 import { notFound } from "next/navigation";
 import { collectGalleryItems, resolveHeroImage } from "@/lib/media";
 
@@ -19,26 +19,17 @@ const FALLBACK_MARKETING_IMAGES = [
 ];
 
 export default async function ProductItemPage({ params, searchParams }) {
-  const { id, categoryId } = params;
+  const { id, categoryId } = await params;
+  const searchParamsResolved = await searchParams;
 
-  let productResponse;
-  try {
-    productResponse = await getProductDetail(id);
-  } catch (error) {
-    if (error?.status === 404) {
-      notFound();
-    }
-    throw error;
-  }
-
-  const product = productResponse?.data || productResponse;
+  const product = await getBillzProduct(id);
 
   if (!product) {
     notFound();
   }
 
   const gender =
-    searchParams?.gender ||
+    searchParamsResolved?.gender ||
     product.gender_audience ||
     product.category?.gender_audience ||
     null;
@@ -171,8 +162,8 @@ export default async function ProductItemPage({ params, searchParams }) {
                 <ProductItem
                   key={related.id}
                   product={related}
-                  section={searchParams?.section}
-                  genderParam={searchParams?.gender || gender}
+                  section={searchParamsResolved?.section}
+                  genderParam={searchParamsResolved?.gender || gender}
                   categoryIdOverride={related.category_id || categoryId}
                 />
               ))}

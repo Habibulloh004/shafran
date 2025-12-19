@@ -66,6 +66,17 @@ export default function Order({ gender = null }) {
         setErrorDialogOpen(true)
         return
       }
+
+      // Payme to'lov - redirect to Payme checkout page
+      if (result.data?.payme?.paymentUrl) {
+        console.log("[checkout] Redirecting to Payme:", result.data.payme.paymentUrl)
+        clearCart()
+        resetCheckout()
+        // window.location.href = result.data.payme.paymentUrl
+        return
+      }
+
+      // Cash to'lov - success sahifasiga yo'naltirish
       setOrders([...orders, result.data])
       clearCart()
       resetCheckout()
@@ -87,7 +98,7 @@ export default function Order({ gender = null }) {
   return (
     <>
       <div className='flex-1'>
-        <div className='relative flex flex-col justify-center items-center pt-3 overflow-visible max-w-xl w-full'>
+        <div className='relative flex flex-col justify-center items-center overflow-visible max-w-xl w-full'>
           <div className='w-full rounded-2xl bg-white/95 dark:bg-[#0b0b0b]/90 border border-black/5 dark:border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.15)]'>
             <div className='min-h-48 md:min-h-[380px] max-w-xl w-full p-5 rounded-t-2xl space-y-4'>
               <div className='flex items-center justify-between'>
@@ -145,7 +156,7 @@ export default function Order({ gender = null }) {
           </div>
           <Button
             className='mt-4 w-full max-w-xl h-12 text-base rounded-2xl font-semibold'
-            disabled={isPending}
+            disabled={isPending || items.length === 0}
             onClick={handleSubmit}
           >
             {isPending ? "Отправляем..." : "Оформить заказ"}

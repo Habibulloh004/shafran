@@ -1,7 +1,7 @@
 import { apiGet } from "./client";
 
 export async function getBanners() {
-  return apiGet("/api/banner", {
+  return apiGet("/api/banner/", {
     revalidate: 1800,
     tags: ["banners"],
   });

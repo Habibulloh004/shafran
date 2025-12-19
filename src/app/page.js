@@ -2,17 +2,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import CustomBackground from "@/components/shared/customBackground";
+import BannerCarousel from "@/components/shared/BannerCarousel";
 import home1Light from "@/assets/img/home1Light.webp";
 import home1Dark from "@/assets/img/home1Dark.webp";
 import home2Light from "@/assets/img/home2Light.webp";
 import home2Dark from "@/assets/img/home2Dark.webp";
-import img2Dark from "@/assets/background/2Dark.webp";
-import img2Light from "@/assets/background/2Light.webp";
-import img3Dark from "@/assets/background/3Dark.webp";
-import img3Light from "@/assets/background/3Light.webp";
 import logoDark from "@/assets/img/logoDark.svg";
 import logoLight from "@/assets/img/logoLight.svg";
-import { getBanners, getCategories } from "@/lib/api";
+import { getBanners } from "@/lib/api";
+import { getBillzCategories } from "../../actions/get";
 import {
   deriveCategorySections,
   extractLeafCategories,
@@ -94,16 +92,10 @@ const SectionHeader = ({ children }) => (
 );
 
 export default async function HomePage() {
-  const [categoriesResponse, bannersResponse] = await Promise.all([
-    getCategories({ limit: 50 }).catch(() => ({ categories: [] })),
+  const [categories, bannersResponse] = await Promise.all([
+    getBillzCategories({ limit: 50 }).catch(() => []),
     getBanners().catch(() => null),
   ]);
-
-  const categories =
-    categoriesResponse?.categories ||
-    categoriesResponse?.data ||
-    categoriesResponse ||
-    [];
 
   const sections = deriveCategorySections(categories);
   const flowersSection = sections.find(
@@ -128,25 +120,9 @@ export default async function HomePage() {
       >
         <SectionHeader />
 
-        <div className="containerCustom relative mx-auto w-11/12 h-20 md:h-42">
-          <Image
-            src={img2Dark}
-            alt="dark img"
-            fill
-            priority
-            quality={100}
-            placeholder="blur"
-            className="absolute inset-0 h-full w-full scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0 object-cover aspect-[16/4] rounded-2xl"
-          />
-          <Image
-            src={img2Light}
-            alt="light img"
-            fill
-            priority
-            quality={100}
-            placeholder="blur"
-            className="absolute inset-0 h-full w-full scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90 object-cover aspect-[16/4] rounded-2xl"
-          />
+        {/* Banner Carousel */}
+        <div className="containerCustom relative mx-auto w-11/12">
+          <BannerCarousel banners={banners} />
         </div>
 
         <div className="containerCustom flex flex-col justify-center items-center gap-3 sm:gap-5 px-4">
@@ -200,51 +176,6 @@ export default async function HomePage() {
             )}
           </div>
         </div>
-
-        {banners.length > 0 ? (
-          <div className="containerCustom relative mx-auto w-11/12 mt-4 md:mt-10 mb-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-            {banners.slice(0, 2).map((banner) => (
-              <Link
-                href={banner.url || "#"}
-                key={banner.id}
-                className="relative h-40 md:h-48 rounded-2xl overflow-hidden bg-black/10 dark:bg-white/10 flex items-center justify-center"
-              >
-                <Image
-                  src={banner.image_light || banner.image_dark || FALLBACK_CARD_IMAGE}
-                  alt={banner.title || "Banner"}
-                  fill
-                  className="object-cover"
-                />
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                  <p className="text-white text-lg font-semibold text-center px-4">
-                    {banner.title || "Специальное предложение"}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="containerCustom relative mx-auto w-11/12 h-20 md:h-42 mt-4 md:mt-10 mb-4">
-            <Image
-              src={img3Dark}
-              alt="dark img"
-              fill
-              priority
-              quality={100}
-              placeholder="blur"
-              className="absolute inset-0 h-full w-full scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0 object-cover rounded-2xl aspect-[16/4]"
-            />
-            <Image
-              src={img3Light}
-              alt="light img"
-              fill
-              priority
-              quality={100}
-              placeholder="blur"
-              className="absolute inset-0 h-full w-full scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90 object-cover rounded-2xl aspect-[16/4]"
-            />
-          </div>
-        )}
       </CustomBackground>
     </div>
   );

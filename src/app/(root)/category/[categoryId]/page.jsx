@@ -2,10 +2,9 @@ import CustomBackground from "@/components/shared/customBackground";
 import famale from "@/assets/background/famale.webp";
 import male from "@/assets/background/male.webp";
 import { cn } from "@/lib/utils";
-import ProductItem from "@/components/shared/productItem";
-import SidebarFilter from "@/components/shared/sidebarFilter";
-import { getCategoryDetail, getProducts } from "@/lib/api";
+import CategoryProductsWithFilters from "@/components/category/CategoryProductsWithFilters";
 import { notFound } from "next/navigation";
+import { getBillzCategory, getBillzProducts } from "../../../../../actions/get";
 
 const FALLBACK_TITLE = "Категория";
 const DEFAULT_PAGINATION = { page: 1, limit: 24 };
@@ -27,106 +26,73 @@ const toNumeric = (value) => {
 };
 
 export default async function CategoryItemPage({ params, searchParams }) {
-  const { categoryId } = params;
-  let categoryResponse;
+  // Next.js 15: params va searchParams ni await qilish kerak
+  const resolvedParams = await params;
+  const resolvedSearchParams = await searchParams;
 
-  try {
-    categoryResponse = await getCategoryDetail(categoryId);
-  } catch (error) {
-    if (error?.status === 404) {
-      notFound();
-    }
+  const { categoryId } = resolvedParams;
 
-    throw error;
-  }
-
-  const category = categoryResponse?.data || categoryResponse;
+  // Kategoriyani olish
+  const category = await getBillzCategory(categoryId);
   if (!category) {
     notFound();
   }
 
-  const filters = category?.filters || null;
-  const section = searchParams?.section || null;
-  const gender = searchParams?.gender || category?.gender_audience || null;
-  const isUnisexOnly = searchParams?.unisex === "true";
+  // Filters obyektini tuzish
+  const section = resolvedSearchParams?.section || null;
+  const gender = resolvedSearchParams?.gender || category?.gender_audience || null;
+  const isUnisexOnly = resolvedSearchParams?.unisex === "true";
 
-  let productsData = [];
-  let pagination = null;
+  // Product filter parametrlarini tuzish
+  const productQuery = {
+    page: Number(resolvedSearchParams?.page) || DEFAULT_PAGINATION.page,
+    limit: Number(resolvedSearchParams?.limit) || DEFAULT_PAGINATION.limit,
+    category_id: categoryId,
+  };
 
-  try {
-    const productQuery = {
-      page: Number(searchParams?.page) || DEFAULT_PAGINATION.page,
-      limit: Number(searchParams?.limit) || DEFAULT_PAGINATION.limit,
-      category_id: categoryId,
-    };
+  const minPrice = toNumeric(resolvedSearchParams?.price_min);
+  const maxPrice = toNumeric(resolvedSearchParams?.price_max);
 
-    const minPrice = toNumeric(searchParams?.price_min);
-    const maxPrice = toNumeric(searchParams?.price_max);
-
-    if (typeof minPrice === "number") {
-      productQuery.price_min = minPrice;
-    }
-
-    if (typeof maxPrice === "number") {
-      productQuery.price_max = maxPrice;
-    }
-
-    const brandIds = toCsvArray(searchParams?.brand_ids);
-    if (brandIds.length > 0) {
-      productQuery.brand_ids = brandIds;
-    }
-
-    const fragranceNoteIds = toCsvArray(searchParams?.fragrance_note_ids);
-    if (fragranceNoteIds.length > 0) {
-      productQuery.fragrance_note_ids = fragranceNoteIds;
-    }
-
-    const seasonIds = toCsvArray(searchParams?.season_ids);
-    if (seasonIds.length > 0) {
-      productQuery.season_ids = seasonIds;
-    }
-
-    const productTypeIds = toCsvArray(searchParams?.product_type_ids);
-    if (productTypeIds.length > 0) {
-      productQuery.product_type_ids = productTypeIds;
-    }
-
-    if (isUnisexOnly) {
-      productQuery.gender_audience = "unisex";
-    } else if (gender) {
-      productQuery.gender_audience = gender;
-    }
-
-    if (searchParams?.search) {
-      productQuery.search = searchParams.search;
-    }
-
-    const productsResponse = await getProducts(productQuery);
-    productsData = productsResponse?.data || [];
-    pagination = productsResponse?.pagination || null;
-  } catch (error) {
-    productsData = [];
-    pagination = null;
+  if (typeof minPrice === "number") {
+    productQuery.price_min = minPrice;
   }
 
-  const priceFilter = filters?.price || null;
-  const selectedFilters = {
-    price: {
-      min:
-        toNumeric(searchParams?.price_min) ??
-        priceFilter?.min ??
-        null,
-      max:
-        toNumeric(searchParams?.price_max) ??
-        priceFilter?.max ??
-        null,
-    },
-    brand_ids: new Set(toCsvArray(searchParams?.brand_ids)),
-    fragrance_note_ids: new Set(toCsvArray(searchParams?.fragrance_note_ids)),
-    season_ids: new Set(toCsvArray(searchParams?.season_ids)),
-    product_type_ids: new Set(toCsvArray(searchParams?.product_type_ids)),
-    unisex: isUnisexOnly,
-  };
+  if (typeof maxPrice === "number") {
+    productQuery.price_max = maxPrice;
+  }
+
+  const brandIds = toCsvArray(resolvedSearchParams?.brand_ids);
+  if (brandIds.length > 0) {
+    productQuery.brand_ids = brandIds;
+  }
+
+  const fragranceNoteIds = toCsvArray(resolvedSearchParams?.fragrance_note_ids);
+  if (fragranceNoteIds.length > 0) {
+    productQuery.fragrance_note_ids = fragranceNoteIds;
+  }
+
+  const seasonIds = toCsvArray(resolvedSearchParams?.season_ids);
+  if (seasonIds.length > 0) {
+    productQuery.season_ids = seasonIds;
+  }
+
+  const productTypeIds = toCsvArray(resolvedSearchParams?.product_type_ids);
+  if (productTypeIds.length > 0) {
+    productQuery.product_type_ids = productTypeIds;
+  }
+
+  if (isUnisexOnly) {
+    productQuery.gender_audience = "unisex";
+  } else if (gender) {
+    productQuery.gender_audience = gender;
+  }
+
+  if (resolvedSearchParams?.search) {
+    productQuery.search = resolvedSearchParams.search;
+  }
+
+  // Productlarni olish
+  const { data: productsData, pagination } = await getBillzProducts(productQuery);
 
   return (
     <CustomBackground
@@ -145,46 +111,13 @@ export default async function CategoryItemPage({ params, searchParams }) {
             {category?.name || FALLBACK_TITLE}
           </h1>
         </div>
-        <div className="relative flex gap-6">
-          <aside className="max-md:hidden w-64 shrink-0">
-            <SidebarFilter
-              filters={filters}
-              selectedFilters={selectedFilters}
-              categoryId={categoryId}
-            />
-          </aside>
-
-          <main className="flex-1 min-h-screen">
-            {productsData.length === 0 ? (
-              <div className="flex flex-col items-center justify-center rounded-2xl bg-white/60 dark:bg-black/50 border border-border/50 py-16">
-                <p className="text-sm md:text-base text-muted-foreground">
-                  Товары не найдены.
-                </p>
-              </div>
-            ) : (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
-                {productsData.map((product) => (
-                  <ProductItem
-                    key={product.id}
-                    product={product}
-                    section={section}
-                    genderParam={searchParams?.gender || gender}
-                    categoryIdOverride={categoryId}
-                  />
-                ))}
-              </div>
-            )}
-
-            {pagination?.total_pages > 1 && (
-              <div className="mt-8 flex justify-center">
-                <p className="text-xs text-muted-foreground">
-                  Страница {pagination.current_page} из{" "}
-                  {pagination.total_pages}
-                </p>
-              </div>
-            )}
-          </main>
-        </div>
+        <CategoryProductsWithFilters
+          products={productsData}
+          section={section}
+          genderParam={resolvedSearchParams?.gender || gender}
+          categoryId={categoryId}
+          pagination={pagination}
+        />
       </div>
     </CustomBackground>
   );

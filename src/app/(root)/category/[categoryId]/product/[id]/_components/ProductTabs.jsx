@@ -116,36 +116,21 @@ export default function ProductTabs({ product }) {
 
   return (
     <div className="w-full">
-      <Tabs defaultValue="description" className="w-full">
+      <Tabs defaultValue="params" className="w-full">
         <TabsList className="flex gap-4 border-b mb-4 bg-transparent border-none">
-          <TabsTrigger
-            value="description"
-            className="data-[state=active]:bg-transparent  data-[state=active]:text-black text-primary  data-[state=active]:font-bold shadow-none  data-[state=active]:shadow-none dark:data-[state=active]:border-none dark:data-[state=active]:bg-transparent"
-          >
-            ОПИСАНИЕ
-          </TabsTrigger>
           <TabsTrigger
             value="params"
             className="data-[state=active]:bg-transparent  data-[state=active]:text-black text-primary  data-[state=active]:font-bold shadow-none  data-[state=active]:shadow-none dark:data-[state=active]:border-none dark:data-[state=active]:bg-transparent"
           >
             ПАРАМЕТРЫ
           </TabsTrigger>
+          <TabsTrigger
+            value="description"
+            className="data-[state=active]:bg-transparent  data-[state=active]:text-black text-primary  data-[state=active]:font-bold shadow-none  data-[state=active]:shadow-none dark:data-[state=active]:border-none dark:data-[state=active]:bg-transparent"
+          >
+            ОПИСАНИЕ
+          </TabsTrigger>
         </TabsList>
-
-        <TabsContent
-          value="description"
-          className="space-y-4 text-xs md:text-sm leading-relaxed"
-        >
-          {descriptionBlocks.length ? (
-            descriptionBlocks.map((block, index) => (
-              <p key={index}>{block}</p>
-            ))
-          ) : (
-            <p className="text-muted-foreground">
-              Подробное описание появится позднее.
-            </p>
-          )}
-        </TabsContent>
 
         <TabsContent value="params" className="space-y-6">
           <div className="bg-primary/10 rounded-xl overflow-hidden">
@@ -210,6 +195,21 @@ export default function ProductTabs({ product }) {
                 </TableBody>
               </Table>
             </div>
+          )}
+        </TabsContent>
+
+        <TabsContent
+          value="description"
+          className="space-y-4 text-xs md:text-sm leading-relaxed"
+        >
+          {descriptionBlocks.length ? (
+            descriptionBlocks.map((block, index) => (
+              <p key={index}>{block}</p>
+            ))
+          ) : (
+            <p className="text-muted-foreground">
+              Подробное описание появится позднее.
+            </p>
           )}
         </TabsContent>
       </Tabs>

@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 
-const backUrl = process.env.BACKEND_URL;
+const backUrl = process.env.BASE_URL || process.env.BACKEND_URL || "http://localhost:8080";
 
 export async function getData({ endpoint, tag, revalidate }) {
   try {
@@ -139,4 +139,146 @@ export async function revalidateData(tag) {
 export async function revalidatePath(path) {
   const { revalidatePath: nextRevalidatePath } = await import('next/cache');
   nextRevalidatePath(path);
+}
+
+// ============================================
+// Billz API Server Actions (Backend proxy orqali)
+// ============================================
+
+// Backend URL - hardcoded chunki env variables serverda yuklanmayapti
+const BACKEND_URL = "https://api.shafranselective.uz";
+
+// Backend orqali Billz API ga so'rov yuborish
+async function fetchBillz(endpoint, params = {}) {
+  const url = new URL(`${BACKEND_URL}/api/billz${endpoint}`);
+
+  // Query parametrlarini qo'shish
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== "") {
+      if (Array.isArray(value)) {
+        value.forEach(v => url.searchParams.append(key, v));
+      } else {
+        url.searchParams.append(key, String(value));
+      }
+    }
+  });
+
+  console.log(`[BILLZ via Backend] GET ${url.toString()}`);
+
+  const response = await fetch(url.toString(), {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    console.error(`[BILLZ via Backend] Error: ${response.status}`);
+    throw new Error(`Billz API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data;
+}
+
+// Brandlarni olish
+export async function getBillzBrands(params = {}) {
+  try {
+    const data = await fetchBillz("/v2/brand", {
+      page: 1,
+      limit: 100,
+      ...params,
+    });
+    return data?.data || data?.brands || [];
+  } catch (error) {
+    console.error("getBillzBrands error:", error);
+    return [];
+  }
+}
+
+// Kategoriyalarni olish
+export async function getBillzCategories(params = {}) {
+  try {
+    const data = await fetchBillz("/v2/category", {
+      page: 1,
+      limit: 100,
+      is_deleted: false,
+      ...params,
+    });
+    return data?.data || data?.categories || [];
+  } catch (error) {
+    console.error("getBillzCategories error:", error);
+    return [];
+  }
+}
+
+// Bitta kategoriyani olish (list ichidan topamiz)
+export async function getBillzCategory(categoryId) {
+  try {
+    // Barcha kategoriyalarni olib, ichidan keraklisini topamiz
+    const categories = await getBillzCategories({ limit: 100 });
+
+    // Rekursiv qidirish funksiyasi
+    const findCategory = (cats, id) => {
+      for (const cat of cats) {
+        if (String(cat.id) === String(id)) {
+          return cat;
+        }
+        // subRows ichidan ham qidirish
+        if (cat.subRows && cat.subRows.length > 0) {
+          const found = findCategory(cat.subRows, id);
+          if (found) return found;
+        }
+        // children ichidan ham qidirish
+        if (cat.children && cat.children.length > 0) {
+          const found = findCategory(cat.children, id);
+          if (found) return found;
+        }
+      }
+      return null;
+    };
+
+    return findCategory(categories, categoryId);
+  } catch (error) {
+    console.error("getBillzCategory error:", error);
+    return null;
+  }
+}
+
+// Productlarni olish (filter bilan)
+export async function getBillzProducts(params = {}) {
+  try {
+    const data = await fetchBillz("/v2/products", {
+      page: 1,
+      limit: 24,
+      ...params,
+    });
+    return {
+      data: data?.data || data?.products || [],
+      pagination: data?.pagination || data?.meta || null,
+    };
+  } catch (error) {
+    console.error("getBillzProducts error:", error);
+    return { data: [], pagination: null };
+  }
+}
+
+// Bitta productni olish (list ichidan topamiz)
+export async function getBillzProduct(productId) {
+  try {
+    // Barcha productlarni olib, ichidan keraklisini topamiz
+    const data = await fetchBillz("/v2/products", {
+      page: 1,
+      limit: 100,
+    });
+
+    const products = data?.products || data?.data || [];
+    const product = products.find(p => String(p.id) === String(productId));
+
+    return product || null;
+  } catch (error) {
+    console.error("getBillzProduct error:", error);
+    return null;
+  }
 }

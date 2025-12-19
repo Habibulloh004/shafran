@@ -16,14 +16,29 @@ const baseUrl =
   process.env.BASE_URL ||
   "http://localhost:8080";
 
+// Billz API so'rovlari local Next.js proxy orqali yuboriladi
+const getBaseUrl = (path) => {
+  // /api/billz/* so'rovlari local serverga yuboriladi (proxy uchun)
+  if (path.startsWith("/api/billz/")) {
+    // Server-side da absolute URL kerak
+    if (typeof window === "undefined") {
+      return process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    }
+    // Client-side da relative URL ishlatiladi
+    return "";
+  }
+  return baseUrl;
+};
+
 const normalizePath = (path) => path.replace(/\/\/+/g, "/").replace(":/", "://");
 
 const buildUrl = (path, params) => {
+  const effectiveBaseUrl = getBaseUrl(path);
   const url =
     path.startsWith("http://") || path.startsWith("https://")
       ? new URL(path)
       : new URL(
-          normalizePath(`${baseUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`)
+          normalizePath(`${effectiveBaseUrl.replace(/\/$/, "")}/${path.replace(/^\//, "")}`)
         );
 
   if (params) {
