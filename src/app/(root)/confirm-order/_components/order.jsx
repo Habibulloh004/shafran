@@ -9,18 +9,19 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog'
 import { createOrder } from 'actions/post';
 import { useProfileStore } from '@/store/profileStore';
+import { Plus, Minus, Trash2 } from 'lucide-react';
 
 export default function Order({ gender = null }) {
   const items = useOrderStore((state) => state.items)
   const clearCart = useOrderStore((state) => state.clearCart)
   const resetCheckout = useOrderStore((state) => state.resetCheckout)
+  const updateQuantity = useOrderStore((state) => state.updateQuantity)
+  const removeItem = useOrderStore((state) => state.removeItem)
   const totals = useMemo(() => computeOrderTotals(items), [items])
 
   const deliveryMethod = useOrderStore((state) => state.deliveryMethod)
   const paymentMethod = useOrderStore((state) => state.paymentMethod)
   const selectedDigitalPayment = useOrderStore((state) => state.selectedDigitalPayment)
-  const useBonus = useOrderStore((state) => state.useBonus)
-  const bonusAmount = useOrderStore((state) => state.bonusAmount)
   const language = useOrderStore((state) => state.language)
   const setOrders = useProfileStore((state) => state.setOrders)
   const orders = useProfileStore((state) => state.orders)
@@ -29,11 +30,9 @@ export default function Order({ gender = null }) {
       deliveryMethod,
       paymentMethod,
       selectedDigitalPayment,
-      useBonus,
-      bonusAmount,
       language,
     }),
-    [deliveryMethod, paymentMethod, selectedDigitalPayment, useBonus, bonusAmount, language]
+    [deliveryMethod, paymentMethod, selectedDigitalPayment, language]
   )
 
   const user = useAuthStore((state) => state.user)
@@ -72,7 +71,7 @@ export default function Order({ gender = null }) {
         console.log("[checkout] Redirecting to Payme:", result.data.payme.paymentUrl)
         clearCart()
         resetCheckout()
-        // window.location.href = result.data.payme.paymentUrl
+        window.location.href = result.data.payme.paymentUrl
         return
       }
 
@@ -116,23 +115,44 @@ export default function Order({ gender = null }) {
                 ) : (
                   <div className="divide-y divide-gray-100 dark:divide-white/10">
                     {items.map((item) => (
-                      <div className='flex justify-between items-center gap-3 px-4 py-3' key={item.key}>
-                        <div className='flex items-start gap-2 min-w-0 flex-1'>
-                          <span className='text-xs font-bold text-primary dark:text-primary/90 mt-0.5 shrink-0'>
-                            {item.quantity}x
-                          </span>
-                          <div className='min-w-0'>
-                            <h1 className='text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-1'>
-                              {item.name}
-                            </h1>
-                            {item.variantLabel && (
-                              <span className='text-xs text-primary'>{item.variantLabel}</span>
-                            )}
-                          </div>
+                      <div className='flex justify-between items-center gap-2 px-3 py-2.5' key={item.key}>
+                        <div className='min-w-0 flex-1'>
+                          <h1 className='text-sm font-semibold text-gray-800 dark:text-gray-100 line-clamp-1'>
+                            {item.name}
+                          </h1>
+                          {item.variantLabel && (
+                            <span className='text-xs text-primary'>{item.variantLabel}</span>
+                          )}
+                          <p className='text-xs text-muted-foreground'>
+                            {item.price.toLocaleString()} {item.currency} x {item.quantity}
+                          </p>
                         </div>
-                        <p className='text-sm font-semibold text-gray-900 dark:text-gray-100 whitespace-nowrap'>
-                          {(item.price * item.quantity).toLocaleString()} {item.currency}
-                        </p>
+                        <div className='flex items-center gap-2 shrink-0'>
+                          <div className='flex items-center gap-1 bg-gray-100 dark:bg-white/10 rounded-lg p-0.5'>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.key, item.quantity - 1)}
+                              className='w-7 h-7 flex items-center justify-center rounded-md hover:bg-gray-200 dark:hover:bg-white/20 transition-colors'
+                            >
+                              <Minus className='w-3.5 h-3.5' />
+                            </button>
+                            <span className='w-6 text-center text-sm font-semibold'>{item.quantity}</span>
+                            <button
+                              type="button"
+                              onClick={() => updateQuantity(item.key, item.quantity + 1)}
+                              className='w-7 h-7 flex items-center justify-center rounded-md hover:bg-gray-200 dark:hover:bg-white/20 transition-colors'
+                            >
+                              <Plus className='w-3.5 h-3.5' />
+                            </button>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeItem(item.key)}
+                            className='w-7 h-7 flex items-center justify-center rounded-md text-red-500 hover:bg-red-100 dark:hover:bg-red-500/20 transition-colors'
+                          >
+                            <Trash2 className='w-3.5 h-3.5' />
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </div>

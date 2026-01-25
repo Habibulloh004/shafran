@@ -124,6 +124,7 @@ export default function CheckoutForm() {
           </div>
         </div>
 
+        {/* TODO: Bonus funksiyasi keyinchalik qo'shiladi
         <div className="px-4 pt-6 pb-6 space-y-3">
           <label className="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-200">
             <Checkbox
@@ -142,6 +143,8 @@ export default function CheckoutForm() {
             />
           )}
         </div>
+        */}
+        <div className="pb-4" />
       </div>
     </main>
   );

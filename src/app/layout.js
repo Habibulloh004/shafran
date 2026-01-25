@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { AuthSyncProvider } from "@/providers/auth-sync-provider";
 import { Montserrat_Alternates } from "next/font/google"
 import MainLayout from "@/components/shared/MainLayout";
 
@@ -46,9 +47,11 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-          <MainLayout>
-            {children}
-          </MainLayout>
+          <AuthSyncProvider>
+            <MainLayout>
+              {children}
+            </MainLayout>
+          </AuthSyncProvider>
         </ThemeProvider>
       </body>
     </html>

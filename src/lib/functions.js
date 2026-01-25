@@ -3,6 +3,7 @@ export function Price({
   currency = "USD",
   locale = "ru-RU",
   className = "",
+  size = "default",
 }) {
   const formatter = new Intl.NumberFormat(locale, {
     style: "currency",
@@ -10,9 +11,15 @@ export function Price({
     maximumFractionDigits: currency === "UZS" ? 0 : 2,
   });
 
+  const sizeClasses = {
+    sm: "text-sm md:text-base",
+    default: "text-base md:text-lg",
+    lg: "text-xl md:text-2xl",
+  };
+
   return (
     <div
-      className={`flex items-start gap-1 text-xl md:text-2xl font-bold ${className}`}
+      className={`flex items-start gap-1 font-bold ${sizeClasses[size] || sizeClasses.default} ${className}`}
     >
       <span>{formatter.format(amount)}</span>
     </div>

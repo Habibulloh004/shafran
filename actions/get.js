@@ -146,7 +146,7 @@ export async function revalidatePath(path) {
 // ============================================
 
 // Backend URL - hardcoded chunki env variables serverda yuklanmayapti
-const BACKEND_URL = "https://api.shafranselective.uz";
+const BACKEND_URL = "http://localhost:8080";
 
 // Backend orqali Billz API ga so'rov yuborish
 async function fetchBillz(endpoint, params = {}) {

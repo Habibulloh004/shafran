@@ -36,12 +36,15 @@ const renderCategoryCard = (category, sectionKey, index) => {
 
   const href = buildCategoryHref(category.id, sectionKey);
 
+  // Uchburchak shakli: har qatordagi o'rtadagi card (index 1, 4) pastga siljiydi
+  const isMiddleCard = index % 3 === 1;
+
   return (
     <Link
       href={href}
       key={category.id}
       className={`w-full max-w-[120px] sm:max-w-[160px] md:max-w-[200px] lg:max-w-[280px] rounded-lg sm:rounded-xl md:rounded-2xl bg-white/60 dark:bg-black/35 flex flex-col justify-center items-center p-2 sm:p-3 md:p-4 ${
-        index === 1 ? "translate-y-4 sm:translate-y-6 md:translate-y-8 lg:translate-y-10" : ""
+        isMiddleCard ? "translate-y-4 sm:translate-y-6 md:translate-y-8 lg:translate-y-10" : ""
       }`}
       prefetch={false}
     >

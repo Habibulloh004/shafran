@@ -10,7 +10,7 @@ import z from "zod";
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { persistAuthCookie, useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
 import ForgotPasswordModal from "@/components/shared/ForgotPasswordModal";
 import { loginUser } from "actions/post";
 
@@ -48,12 +48,17 @@ export default function LoginPage() {
         password: values.password,
       });
       console.log("Login response:", response);
-      if (!response || !response.data.token) {
-        setErrorMessage("Не удалось войти. Проверьте данные.");
+      if (!response?.success || !response.data?.token) {
+        setErrorMessage(response?.error || "Не удалось войти. Проверьте данные.");
         return;
       }
-      setAuth(response?.data);
-      router.push("/");
+
+      // Set auth state in zustand store (cookie already set by server action)
+      setAuth(response.data);
+
+      // Refresh to ensure server components see the new cookie, then navigate
+      router.refresh();
+      router.push("/profile");
     } catch (error) {
       console.error("Login error", error);
       if (error?.status === 401 || error?.status === 404) {
@@ -107,7 +112,7 @@ export default function LoginPage() {
                   name="phone"
                   placeholder={"Enter phone"}
                   label={"Номер телефона"}
-                  inputClass="text-foreground w-full"
+                  inputClass="text-white w-full"
                   disabled={isLoading}
                 />
 
@@ -118,7 +123,7 @@ export default function LoginPage() {
                   placeholder={"Введите пароль"}
                   label={"Пароль"}
                   inputType="password"
-                  inputClass="text-foreground rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
+                  inputClass="text-white rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
                   disabled={isLoading}
                 />
 

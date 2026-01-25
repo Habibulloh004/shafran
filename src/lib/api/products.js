@@ -61,16 +61,16 @@ export async function getProducts(params = {}) {
   };
 
   const attemptChain = [
-    // Billz API - /v2/products (plural - to'g'ri endpoint)
+    // Backend API (ishonchli)
     () =>
-      apiGet("/api/billz/v2/products", {
+      apiGet("/api/products", {
         params: queryParams,
         revalidate: 300,
         tags: ["products"],
       }),
-    // Backend API fallback
+    // Billz API fallback
     () =>
-      apiGet("/api/products", {
+      apiGet("/api/billz/v2/products", {
         params: queryParams,
         revalidate: 300,
         tags: ["products"],
@@ -85,13 +85,9 @@ export async function getProducts(params = {}) {
         return normalized;
       }
     } catch (error) {
-      if (error?.status === 404) {
-        continue;
-      }
-
-      if (error?.status && ![401, 402, 403].includes(error.status)) {
-        throw error;
-      }
+      console.error("[getProducts] API error:", error?.message || error);
+      // Keyingi attemptga o'tish
+      continue;
     }
   }
 
@@ -99,9 +95,15 @@ export async function getProducts(params = {}) {
 }
 
 export async function getProductDetail(id, params) {
-  // Birinchi navbatda barcha productlardan qidiramiz (chunki /v2/products/{id} ishlamaydi)
   const attemptChain = [
-    // Billz API - barcha productlarni olib ichidan topish
+    // Backend API (ishonchli)
+    () =>
+      apiGet(`/api/products/${id}`, {
+        ...(params || {}),
+        revalidate: 900,
+        tags: [`product:${id}`],
+      }),
+    // Billz API fallback - barcha productlarni olib ichidan topish
     () =>
       apiGet("/api/billz/v2/products", {
         params: {
@@ -109,13 +111,6 @@ export async function getProductDetail(id, params) {
           limit: 100,
           ...(params || {}),
         },
-        revalidate: 900,
-        tags: [`product:${id}`],
-      }),
-    // Backend API fallback
-    () =>
-      apiGet(`/api/products/${id}`, {
-        ...(params || {}),
         revalidate: 900,
         tags: [`product:${id}`],
       }),
@@ -129,13 +124,9 @@ export async function getProductDetail(id, params) {
         return product;
       }
     } catch (error) {
-      if (error?.status === 404) {
-        continue;
-      }
-
-      if (error?.status && ![401, 402, 403].includes(error.status)) {
-        throw error;
-      }
+      console.error("[getProductDetail] API error:", error?.message || error);
+      // Keyingi attemptga o'tish
+      continue;
     }
   }
 

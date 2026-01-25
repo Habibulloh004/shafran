@@ -58,6 +58,13 @@ export default function ProductItem({
   }, [product]);
 
   const addItem = useOrderStore((state) => state.addItem);
+  const cartItems = useOrderStore((state) => state.items);
+
+  // Find quantity of this product in cart
+  const quantityInCart = useMemo(() => {
+    const cartItem = cartItems.find((item) => item.productId === id);
+    return cartItem?.quantity || 0;
+  }, [cartItems, id]);
 
   const handleAddToCart = (e) => {
     e.preventDefault();
@@ -127,14 +134,19 @@ export default function ProductItem({
             {name || slug || "Без названия"}
           </h1>
         </div>
-        <div className="flex justify-between items-center gap-3">
-          <Price amount={price} currency={currency} />
+        <div className="flex justify-between items-center gap-2">
+          <Price amount={price} currency={currency} size="sm" className="flex-1 min-w-0" />
           <Button
             type="button"
             onClick={handleAddToCart}
-            className="w-7 h-7 md:h-10 md:w-10 rounded-full hover:opacity-70 transition-all ease-linear duration-200 cursor-pointer bg-primary text-white"
+            className="relative shrink-0 w-7 h-7 md:h-9 md:w-9 rounded-full hover:opacity-70 transition-all ease-linear duration-200 cursor-pointer bg-primary text-white"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3 h-3 md:w-4 md:h-4" />
+            {quantityInCart > 0 && (
+              <span className="absolute -top-1 -right-1 bg-green-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center">
+                {quantityInCart}
+              </span>
+            )}
           </Button>
         </div>
       </div>

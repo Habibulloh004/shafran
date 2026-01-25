@@ -25,7 +25,6 @@ export async function createShafranOrder(payload, token) {
       payment_method: payload.checkout?.paymentMethod || "cash",
       currency: payload.totals?.currency || "UZS",
       total_amount: payload.totals?.amount || 0,
-      bonus_amount: payload.checkout?.bonusAmount || 0,
       notes: payload.checkout?.comment || "",
       products:
         payload.items?.map((item) => ({
@@ -54,8 +53,8 @@ export async function createShafranPaymeCheckout({
     ...((rawPayload && typeof rawPayload === "object") ? rawPayload : {}),
     internalOrderId: orderId,
   };
-  
 
+  console.log({ payloadDetails })
   const response = await fetch(`${SHAFRAN_API}/api/payme/checkout`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -76,15 +75,15 @@ export async function createShafranPaymeCheckout({
 
   const payload = await handleJsonResponse(response);
   console.log("Payme checkout payload:", payload);
-  console.log({payloadDetails})
+  console.log({ payloadDetails })
   const transactionId =
-    payload?.transaction_id 
+    payload?.transaction_id
 
   const normalizedOrderId =
-    payload?.orderId 
+    payload?.orderId
 
   const paymentUrl =
-    payload?.payment_url
+    payload?.url || payload?.payment_url
 
   return {
     transactionId,

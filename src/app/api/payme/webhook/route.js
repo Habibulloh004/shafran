@@ -41,6 +41,9 @@ export async function POST(request) {
           response: billz,
         },
       });
+
+      // Telegram notification is handled by the backend server
+
       return respond({ success: true, billz });
     } catch (error) {
       updateInternalOrder(order.id, { status: "failed", error: error?.message });

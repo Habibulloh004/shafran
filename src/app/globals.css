@@ -328,3 +328,18 @@
   }
 
 }
+
+/* Auth pages (login/register) - date input calendar icon white */
+input[type="date"].text-white::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+}
+
+/* Auth pages - select trigger text white when has text-white class */
+.auth-select-white {
+  color: white !important;
+}
+
+.auth-select-white [data-placeholder] {
+  color: rgba(255, 255, 255, 0.6) !important;
+}

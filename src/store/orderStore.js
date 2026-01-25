@@ -67,8 +67,6 @@ const initialState = {
   selectedAddress: null,
   paymentMethod: "cash",
   selectedDigitalPayment: "",
-  useBonus: false,
-  bonusAmount: 0,
   cardNumber: "",
   expiry: "",
   language: "ru",
@@ -135,10 +133,6 @@ export const useOrderStore = create(
 
       setDigitalPayment: (provider) => set({ selectedDigitalPayment: provider }),
 
-      setUseBonus: (value) => set({ useBonus: value === true }),
-
-      setBonusAmount: (value) => set({ bonusAmount: value }),
-
       setCardNumber: (value) => set({ cardNumber: value }),
 
       setExpiry: (value) => set({ expiry: value }),
@@ -152,8 +146,6 @@ export const useOrderStore = create(
           selectedAddress: initialState.selectedAddress,
           paymentMethod: initialState.paymentMethod,
           selectedDigitalPayment: initialState.selectedDigitalPayment,
-          useBonus: initialState.useBonus,
-          bonusAmount: initialState.bonusAmount,
           cardNumber: initialState.cardNumber,
           expiry: initialState.expiry,
           language: initialState.language,

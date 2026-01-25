@@ -1,12 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { AUTH_COOKIE } from "@/lib/auth/constants";
-import { buildBillzOrder } from "@/lib/server/billz";
-import {
-  createInternalOrder,
-  updateInternalOrder,
-  appendOrderLog,
-} from "@/lib/server/internalOrders";
 import {
   createShafranOrder,
   createShafranPaymeCheckout,
@@ -33,160 +27,109 @@ async function getAuthSession() {
 }
 
 /**
- * CASH to'lov - Shafran server + Billz
+ * CASH to'lov - faqat Shafran backend'ga yuborish
+ * Billz integratsiyasi backend tomonida amalga oshiriladi
  */
-async function handleCashOrder(order, token) {
-  let shafranResult = null;
-  let shafranError = null;
-
+async function handleCashOrder(payload, token, user) {
   if (!token) {
-    const errorMsg = "AUTH_REQUIRED: valid user token is required to create cash orders";
-    console.error("[Cash Order] Missing auth token:", errorMsg);
     return NextResponse.json(
-      {
-        success: false,
-        error: errorMsg,
-      },
+      { success: false, error: "AUTH_REQUIRED" },
       { status: 401 }
     );
   }
 
-  // 1. Shafran serverga order yaratish
   try {
-    shafranResult = await createShafranOrder(order.rawPayload, token);
-    console.log("[Cash Order] Shafran order created:", shafranResult?.data?.order_number);
+    // Shafran backend'ga order yaratish
+    // Backend o'zi Billz'ga yuboradi va Telegram xabar yuboradi
+    const result = await createShafranOrder(payload, token);
+    console.log("[Cash Order] Backend order created:", result?.data?.order_number);
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        orderId: result?.data?.id,
+        orderNumber: result?.data?.order_number,
+        status: result?.data?.status,
+        ...result?.data,
+      },
+    });
   } catch (err) {
-    shafranError = err?.message || "Shafran order failed";
-    console.error("[Cash Order] Shafran order failed:", shafranError);
-  }
-
-  // 2. Billz ga order yaratish
-  let billzResult = null;
-  let billzError = null;
-
-  try {
-    billzResult = await buildBillzOrder(order.rawPayload);
-    console.log("[Cash Order] Billz order created:", billzResult?.orderId);
-  } catch (err) {
-    billzError = err?.message || "Billz order failed";
-    console.error("[Cash Order] Billz order failed:", billzError);
-  }
-
-  // Agar ikkisi ham muvaffaqiyatsiz bo'lsa
-  if (!shafranResult && !billzResult) {
+    console.error("[Cash Order] Failed:", err);
     return NextResponse.json(
       {
         success: false,
-        error: shafranError || billzError || "Buyurtma yaratib bo'lmadi",
+        error: err?.message || "Buyurtma yaratib bo'lmadi",
       },
       { status: 500 }
     );
   }
-
-  return NextResponse.json({
-    success: true,
-    data: {
-      internalOrderId: order.id,
-      shafran: shafranResult,
-      billz: billzResult,
-    },
-  });
 }
 
 /**
- * PAYME to'lov - Shafran server orqali Payme checkout
+ * PAYME to'lov - Shafran backend orqali
+ * To'lov muvaffaqiyatli bo'lganda backend Billz'ga order yaratadi
  */
-async function handlePaymeOrder(order, userId, token) {
+async function handlePaymeOrder(payload, userId, token) {
   if (!token) {
-    const message = "AUTH_REQUIRED: valid user token is required to create Payme orders";
-    appendOrderLog(order.id, message);
-    return NextResponse.json({ success: false, error: message }, { status: 401 });
+    return NextResponse.json(
+      { success: false, error: "AUTH_REQUIRED" },
+      { status: 401 }
+    );
   }
 
   let shafranResult = null;
   let shafranMeta = null;
 
   try {
-    shafranResult = await createShafranOrder(order.rawPayload, token);
+    // 1. Shafran backend'da order yaratish
+    shafranResult = await createShafranOrder(payload, token);
     shafranMeta = normalizeShafranOrder(shafranResult);
-    console.log({ shafranResult, shafranMeta });
+    console.log("[Payme Order] Backend order created:", shafranMeta);
+
     if (!shafranMeta.id) {
-      throw new Error("Shafran order did not return an identifier");
+      throw new Error("Backend order did not return an identifier");
     }
-    appendOrderLog(
-      order.id,
-      `Shafran order ${shafranMeta.orderNumber || shafranMeta.id} created before Payme checkout`
-    );
   } catch (err) {
-    appendOrderLog(order.id, `Shafran order creation failed before Payme: ${err?.message}`);
-    updateInternalOrder(order.id, {
-      status: "failed",
-      error: err?.message,
-    });
-    console.error("[Payme Order] Shafran order failed:", err);
+    console.error("[Payme Order] Backend order failed:", err);
     return NextResponse.json(
       {
         success: false,
-        error: err?.message || "Shafran order yaratib bo'lmadi",
+        error: err?.message || "Buyurtma yaratib bo'lmadi",
       },
       { status: 500 }
     );
   }
 
-  const checkoutAmount = shafranMeta.totalAmount || order.amount;
-  const checkoutCurrency = shafranMeta.currency || order.currency;
+  // 2. Payme checkout yaratish
+  const checkoutAmount = shafranMeta.totalAmount || payload.totals?.amount || 0;
+  const checkoutCurrency = shafranMeta.currency || payload.totals?.currency || "UZS";
 
   try {
     const payme = await createShafranPaymeCheckout({
-      orderId: shafranResult?.data?.id,
+      orderId: shafranMeta.id,
       amount: checkoutAmount,
       currency: checkoutCurrency,
       userId,
-      rawPayload: order.rawPayload,
+      rawPayload: payload,
     });
     console.log("[Payme Order] Checkout created:", payme);
 
-    updateInternalOrder(order.id, {
-      status: "pending_payment",
-      shafran: {
-        response: shafranResult,
-        meta: shafranMeta,
-      },
-      payme: {
-        transactionId: payme.transactionId,
-        orderId: payme.orderId,
-        paymentUrl: payme.paymentUrl,
-        amount: checkoutAmount,
-        rawResponse: payme.rawResponse,
-      },
-    });
-    appendOrderLog(
-      order.id,
-      `Payme checkout created (${payme.transactionId || "no transaction id"})`
-    );
+    // Telegram notification is handled by the backend server
 
     return NextResponse.json({
       success: true,
       data: {
-        orderId: order.id,
+        orderId: shafranMeta.id,
+        orderNumber: shafranMeta.orderNumber,
         paymentMethod: "payme",
         payme: {
           paymentUrl: payme.paymentUrl,
           orderId: payme.orderId,
           transactionId: payme.transactionId,
         },
-        shafran: {
-          orderId: shafranMeta.id,
-          orderNumber: shafranMeta.orderNumber,
-        },
       },
     });
   } catch (err) {
-    appendOrderLog(order.id, `Payme checkout failed: ${err?.message}`);
-    updateInternalOrder(order.id, {
-      status: "failed",
-      error: err?.message,
-    });
     console.error("[Payme Order] Checkout failed:", err);
     return NextResponse.json(
       {
@@ -209,8 +152,7 @@ function filterOrdersByUser(orders, user) {
 
   const userId = user.user_id;
   return orders.filter((order) => {
-    const orderUserId =
-      order?.user_id;
+    const orderUserId = order?.user_id;
     return !!orderUserId && orderUserId === userId;
   });
 }
@@ -218,13 +160,13 @@ function filterOrdersByUser(orders, user) {
 export async function GET() {
   const session = await getAuthSession();
   console.log("[Orders GET] Auth session:", session);
+
   if (!session.token) {
     return NextResponse.json(
       { success: false, error: "AUTH_REQUIRED" },
       { status: 401 }
     );
   }
-
 
   try {
     const orders = await fetchShafranOrders(session.token);
@@ -235,7 +177,7 @@ export async function GET() {
       data: filteredOrders,
     });
   } catch (error) {
-    console.error("[Orders GET] Failed to fetch backend orders:", error);
+    console.error("[Orders GET] Failed to fetch orders:", error);
     return NextResponse.json(
       {
         success: false,
@@ -248,12 +190,16 @@ export async function GET() {
 
 /**
  * POST - Order yaratish
+ * Barcha Billz integratsiyasi backend tomonida amalga oshiriladi:
+ * - Cash to'lov: backend darhol Billz'ga yuboradi
+ * - Payme to'lov: to'lov muvaffaqiyatli bo'lganda backend Billz'ga yuboradi
  */
 export async function POST(request) {
   const payload = await request.json().catch(() => ({}));
   const session = await getAuthSession();
   const token = session.token;
   const sessionUser = session.user;
+
   const paymentMethod =
     payload.checkout?.paymentMethod ||
     payload.payment_method ||
@@ -268,27 +214,9 @@ export async function POST(request) {
 
   console.log("[Order] Creating order with payment method:", paymentMethod);
 
-  // Order tracking uchun
   if (paymentMethod === "payme") {
-    if (!token) {
-      return NextResponse.json(
-        { success: false, error: "AUTH_REQUIRED" },
-        { status: 401 }
-      );
-    }
-    const shafranOrder = createInternalOrder(payload, { authToken: token });
-    appendOrderLog(shafranOrder.id, "ShafranOrder created before Payme checkout");
-    return handlePaymeOrder(shafranOrder, userId, token);
+    return handlePaymeOrder(payload, userId, token);
   }
 
-  const order = {
-    id: crypto.randomUUID(),
-    rawPayload: payload,
-    paymentMethod,
-    amount: payload.totals?.amount || 0,
-    currency: payload.totals?.currency || "UZS",
-    createdAt: new Date().toISOString(),
-  };
-
-  return handleCashOrder(order, token);
+  return handleCashOrder(payload, token, sessionUser);
 }

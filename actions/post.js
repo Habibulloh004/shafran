@@ -163,6 +163,7 @@ export async function loginUser(data) {
       password: data.password
     };
 
+    // 1. Backend'dan login
     const response = await fetch(`${backUrl}/api/auth/login`, {
       method: "POST",
       headers: {
@@ -170,49 +171,66 @@ export async function loginUser(data) {
       },
       body: JSON.stringify(userData),
     });
-    const billzRes = await fetch(`${backUrl}/api/billz/v1/client?phone_number=${data.phone}`);
-    if (!response.ok && !billzRes.ok) {
+
+    if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || 'Login failed');
     }
-    const billzResData = await billzRes.json();
+
     const result = await response.json();
     console.log("Login result:", result);
-    console.log("Billz client data:", billzResData);
-    if (billzResData?.clients?.length > 0) {
 
-      const sessionPayload = {
-        token: result.token,
-        user: {
-          ...billzResData.clients[0],
-          user_id: result.user.id,
-        },
-      };
-
-      if (result.token) {
-        const cookiePayload = {
-          ...sessionPayload,
-          phone_number:
-            billzResData.clients[0]?.phone_number ||
-            billzResData.clients[0]?.phone ||
-            null,
-          issued_at: new Date().toISOString(),
-        };
-        cookies().set({
-          httpOnly: true,
-          secure: process.env.NODE_ENV === 'production',
-          maxAge: 7 * 24 * 60 * 60,
-          path: '/',
-          name: AUTH_COOKIE,
-          value: encodeURIComponent(JSON.stringify(cookiePayload)),
-        });
-      }
-      revalidateTag('user');
-      revalidatePath('/profile');
-
-      return { success: true, data: sessionPayload };
+    if (!result.token) {
+      throw new Error('Token not received');
     }
 
+    // 2. Billz'dan client ma'lumotlarini olish
+    let billzClient = null;
+    try {
+      const billzRes = await fetch(`${backUrl}/api/billz/v1/client?phone_number=${data.phone}`);
+      if (billzRes.ok) {
+        const billzResData = await billzRes.json();
+        console.log("Billz client data:", billzResData);
+        if (billzResData?.clients?.length > 0) {
+          billzClient = billzResData.clients[0];
+        }
+      }
+    } catch (billzErr) {
+      console.warn("Billz client fetch failed:", billzErr);
+    }
+
+    // 3. Session payload yaratish
+    const sessionPayload = {
+      token: result.token,
+      user: {
+        ...(billzClient || {}),
+        user_id: result.user?.id,
+        id: billzClient?.id || result.user?.id,
+      },
+    };
+
+    // 4. Cookie o'rnatish
+    const cookiePayload = {
+      ...sessionPayload,
+      phone_number: billzClient?.phone_number || billzClient?.phone || data.phone,
+      issued_at: new Date().toISOString(),
+    };
+
+    const cookieStore = await cookies();
+    cookieStore.set({
+      name: AUTH_COOKIE,
+      value: encodeURIComponent(JSON.stringify(cookiePayload)),
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60,
+      path: '/',
+    });
+
+    revalidateTag('user');
+    revalidatePath('/profile');
+
+    return { success: true, data: sessionPayload };
   } catch (error) {
     console.error("Login error:", error);
     return { success: false, error: error.message };

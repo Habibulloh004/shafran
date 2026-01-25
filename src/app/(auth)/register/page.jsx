@@ -186,7 +186,7 @@ export default function RegisterPage() {
                       { value: "1", label: "Мужской" },
                       { value: "2", label: "Женский" },
                     ]}
-                    className="text-white h-10 sm:h-11 md:h-12"
+                    className="text-white h-10 sm:h-11 md:h-12 bg-transparent border [&>span]:text-white"
                     disabled={isLoading}
                   />
                 </div>

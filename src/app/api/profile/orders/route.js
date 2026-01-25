@@ -21,20 +21,6 @@ async function getSession() {
   }
 }
 
-function filterOrdersForUser(orders, user) {
-  if (!Array.isArray(orders)) return [];
-  if (!user?.id) return orders;
-  const userId = user.id || user.user_id;
-  return orders.filter((order) => {
-    const orderUserId =
-      order?.user_id ||
-      order?.user?.id ||
-      order?.user?.user_id ||
-      order?.customer_id;
-    return !!orderUserId && orderUserId === userId;
-  });
-}
-
 export async function GET() {
   const session = await getSession();
   if (!session.token) {
@@ -45,9 +31,9 @@ export async function GET() {
   }
 
   try {
+    // Backend allaqachon user_id bo'yicha filter qiladi (token'dan user ID olinadi)
     const orders = await fetchShafranOrders(session.token);
-    const filtered = filterOrdersForUser(orders, session.user);
-    return NextResponse.json({ success: true, data: filtered });
+    return NextResponse.json({ success: true, data: orders });
   } catch (error) {
     console.error("[Profile Orders] fetchShafranOrders failed", error);
     return NextResponse.json(

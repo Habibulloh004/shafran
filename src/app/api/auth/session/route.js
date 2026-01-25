@@ -1,6 +1,5 @@
-"use server";
-
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { AUTH_COOKIE } from "@/lib/auth/constants";
 
 const DEFAULT_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
@@ -22,6 +21,45 @@ const buildCookieOptions = (maxAge = DEFAULT_MAX_AGE) => ({
   path: "/",
   maxAge,
 });
+
+/**
+ * GET - Session mavjudligini tekshirish
+ * AuthSyncProvider bu endpoint'ni chaqiradi
+ */
+export async function GET() {
+  const cookieStore = await cookies();
+  const authCookie = cookieStore.get(AUTH_COOKIE);
+
+  if (!authCookie?.value) {
+    return NextResponse.json(
+      { success: false, error: "NO_SESSION" },
+      { status: 401 }
+    );
+  }
+
+  try {
+    const parsed = JSON.parse(decodeURIComponent(authCookie.value));
+    if (!parsed?.token) {
+      return NextResponse.json(
+        { success: false, error: "INVALID_SESSION" },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: {
+        token: parsed.token,
+        user: parsed.user || null,
+      },
+    });
+  } catch {
+    return NextResponse.json(
+      { success: false, error: "INVALID_SESSION" },
+      { status: 401 }
+    );
+  }
+}
 
 export async function POST(request) {
   let body = null;

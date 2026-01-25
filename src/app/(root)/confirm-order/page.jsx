@@ -3,13 +3,13 @@ import React from 'react'
 import famale from "@/assets/background/famale.webp";
 import male from "@/assets/background/male.webp";
 import { cn } from '@/lib/utils';
-import ProductItem from '@/components/shared/productItem';
 import { CreditCard } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import Order from './_components/order';
 import Payment from './_components/payment';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getBillzProducts } from '../../../../actions/get';
+import SimilarProductsCarousel from './_components/SimilarProductsCarousel';
 
 const resolveSearchParams = async (searchParams) => {
   if (!searchParams) return {};
@@ -19,10 +19,32 @@ const resolveSearchParams = async (searchParams) => {
   return searchParams;
 };
 
+// Fisher-Yates shuffle algorithm
+function shuffleArray(array) {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export default async function ConfirmPage({ searchParams }) {
   const params = await resolveSearchParams(searchParams);
   const gender = params?.gender;
   const success = params?.status === "success";
+
+  // Billz API dan productlarni olish va 10 ta random tanlash
+  let randomProducts = [];
+  try {
+    const { data: products } = await getBillzProducts({ limit: 50 });
+    if (products && products.length > 0) {
+      const shuffled = shuffleArray(products);
+      randomProducts = shuffled.slice(0, 10);
+    }
+  } catch (error) {
+    console.error("Failed to fetch products:", error);
+  }
   
   if (success) {
     return (
@@ -80,16 +102,7 @@ export default async function ConfirmPage({ searchParams }) {
             </div>
           </div>
         </section>
-        <section className='containerCustom w-11/12 pt-10 space-y-4'>
-          <h1 className='text-center text-xl md:text-3xl font-bold'>
-            Похожие товары
-          </h1>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
-            {[1, 2, 3, 4, 5, 6]?.map((item) => (
-              <ProductItem key={item} />
-            ))}
-          </div>
-        </section>
+        <SimilarProductsCarousel products={randomProducts} />
       </CustomBackground>
     )
   } else {
@@ -118,16 +131,7 @@ export default async function ConfirmPage({ searchParams }) {
             <Order gender={gender} />
           </div>
         </section>
-        <section className='containerCustom w-11/12 pt-10 space-y-4'>
-          <h1 className='text-center text-xl md:text-3xl font-bold'>
-            Похожие товары
-          </h1>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
-            {[1, 2, 3, 4, 5, 6]?.map((item) => (
-              <ProductItem key={item} />
-            ))}
-          </div>
-        </section>
+        <SimilarProductsCarousel products={randomProducts} />
       </CustomBackground>
     )
   }

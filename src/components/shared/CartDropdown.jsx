@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react'
+import React, { useState, useMemo } from 'react'
 import { Button } from '../ui/button'
 import Image from 'next/image'
 import {
@@ -21,7 +21,6 @@ import {
 import { useOrderStore, computeOrderTotals } from "@/store/orderStore";
 import CartItem from './CartItem';
 import Link from "next/link";
-import { useMemo } from "react";
 
 const CartList = ({ items }) => {
   if (items.length === 0) {
@@ -51,6 +50,19 @@ export default function CartDropdown() {
   const items = useOrderStore((state) => state.items);
   const clearCart = useOrderStore((state) => state.clearCart);
   const totals = useMemo(() => computeOrderTotals(items), [items]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  const handleClearCart = () => {
+    clearCart();
+    setDialogOpen(false);
+    setDropdownOpen(false);
+  };
+
+  const handleGoToOrder = () => {
+    setDialogOpen(false);
+    setDropdownOpen(false);
+  };
 
   const renderFooter = (isDialog = false) => {
     const layoutClasses = isDialog
@@ -64,6 +76,7 @@ export default function CartDropdown() {
       >
         <Link
           href="/confirm-order"
+          onClick={handleGoToOrder}
           className={`${actionWidth} h-11 rounded-2xl bg-primary/70 text-white flex items-center justify-center hover:bg-primary/60`}
         >
           Оформить заказ
@@ -72,7 +85,7 @@ export default function CartDropdown() {
           <Button
             variant={"outline"}
             className={`${actionWidth} h-11 rounded-2xl bg-primary/10 text-black dark:text-white`}
-            onClick={clearCart}
+            onClick={handleClearCart}
           >
             Убрать всё
           </Button>
@@ -84,7 +97,7 @@ export default function CartDropdown() {
   return (
     <>
       <div className='max-md:hidden'>
-        <DropdownMenu className="">
+        <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen} className="">
           <DropdownMenuTrigger asChild>
             <Button variant="icon" size="icon" className="relative w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10">
               <Image
@@ -103,9 +116,9 @@ export default function CartDropdown() {
                 height={0}
                 className="h-[1.1rem] w-[1.1rem] md:h-[1.2rem] md:w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
               />
-              {totals.quantity > 0 && (
+              {items.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] rounded-full px-1">
-                  {totals.quantity}
+                  {items.length}
                 </span>
               )}
             </Button>
@@ -130,7 +143,7 @@ export default function CartDropdown() {
         </DropdownMenu>
       </div>
       <div className='md:hidden'>
-        <Dialog className="md:hidden">
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen} className="md:hidden">
           <DialogTrigger asChild>
             <Button
               variant="icon"
@@ -153,9 +166,9 @@ export default function CartDropdown() {
                 height={0}
                 className="h-[1.1rem] w-[1.1rem] md:h-[1.2rem] md:w-[1.2rem] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90"
               />
-              {totals.quantity > 0 && (
+              {items.length > 0 && (
                 <span className="absolute -top-1 -right-1 bg-primary text-white text-[10px] rounded-full px-1">
-                  {totals.quantity}
+                  {items.length}
                 </span>
               )}
             </Button>

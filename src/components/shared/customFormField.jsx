@@ -112,7 +112,7 @@ const RenderInput = ({ field, className, props, rules }) => {
           >
             <SelectTrigger
               className={cn(
-                "flex items-center justify-between rounded-md border h-12 px-4 bg-[#F6F7F9] text-sm text-black placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+                "flex items-center justify-between rounded-md border h-12 px-4 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
                 props.className,
                 className
               )}
@@ -129,7 +129,7 @@ const RenderInput = ({ field, className, props, rules }) => {
                 <SelectItem
                   key={option.value}
                   value={option.value}
-                  className="cursor-pointer px-3 py-2 hover:bg-black hover:text-white rounded-md"
+                  className="cursor-pointer px-3 py-2 hover:bg-black hover:text-white rounded-md text-black"
                 >
                   {option.label}
                 </SelectItem>
