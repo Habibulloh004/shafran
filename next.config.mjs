@@ -1,16 +1,20 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: "50mb",
+    },
+  },
   images: {
     unoptimized: true,
     remotePatterns: [
       {
-        protocol: "https",
-        hostname: "pub-9663a06e424a4b83b79dc3ab241710a4.r2.dev", // R2 public URL domeni
+        protocol: "http",
+        hostname: "localhost",
         pathname: "/**",
       },
     ],
   },
-
 };
 
 export default nextConfig;

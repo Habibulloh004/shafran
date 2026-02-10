@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import StatsCard from "@/components/admin/StatsCard";
+import { apiGet } from "@/lib/api/client";
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState({
@@ -19,9 +20,12 @@ export default function AdminDashboard() {
     const fetchData = async () => {
       try {
         // Bannerlar sonini olish
-        const bannersRes = await fetch("/api/banner");
-        const bannersData = await bannersRes.json();
-        const bannersCount = bannersData?.data?.length || 0;
+        const bannersData = await apiGet("/api/banner");
+        const bannersCount = Array.isArray(bannersData?.data)
+          ? bannersData.data.length
+          : Array.isArray(bannersData)
+            ? bannersData.length
+            : 0;
 
         setStats({
           banners: bannersCount,
