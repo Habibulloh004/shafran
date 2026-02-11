@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
 import CustomBackground from "@/components/shared/customBackground";
 import BannerCarousel from "@/components/shared/BannerCarousel";
@@ -16,57 +15,7 @@ import {
   extractLeafCategories,
   SECTION_KEYS,
 } from "@/lib/catalog";
-
-const FALLBACK_CARD_IMAGE = "/background/creed.webp";
-
-const buildCategoryHref = (categoryId, sectionKey) => {
-  if (!categoryId) return "#";
-  const params = sectionKey ? `?section=${sectionKey}` : "";
-  return `/category/${categoryId}${params}`;
-};
-
-const pickCategoryImage = (category) =>
-  category?.card_image ||
-  category?.hero_image_light ||
-  category?.hero_image_dark ||
-  FALLBACK_CARD_IMAGE;
-
-const renderCategoryCard = (category, sectionKey, index) => {
-  if (!category) return null;
-
-  const href = buildCategoryHref(category.id, sectionKey);
-
-  // Uchburchak shakli: har qatordagi o'rtadagi card (index 1, 4) pastga siljiydi
-  const isMiddleCard = index % 3 === 1;
-
-  return (
-    <Link
-      href={href}
-      key={category.id}
-      className={`w-full max-w-[120px] sm:max-w-[160px] md:max-w-[200px] lg:max-w-[280px] rounded-lg sm:rounded-xl md:rounded-2xl bg-white/60 dark:bg-black/35 flex flex-col justify-center items-center p-2 sm:p-3 md:p-4 ${
-        isMiddleCard ? "translate-y-4 sm:translate-y-6 md:translate-y-8 lg:translate-y-10" : ""
-      }`}
-      prefetch={false}
-    >
-      <div className="relative w-[80px] h-[60px] sm:w-[120px] sm:h-[90px] md:w-[160px] md:h-[120px] lg:w-[200px] lg:h-[150px] xl:w-[250px] xl:h-[200px]">
-        <Image
-          src={pickCategoryImage(category)}
-          alt={category.name || "Категория"}
-          fill
-          priority
-          quality={100}
-          className="object-contain"
-        />
-      </div>
-      <p className="text-xs sm:text-sm md:text-base text-black/70 dark:text-white/60">
-        {category.subtitle || category.description || "Коллекция"}
-      </p>
-      <h2 className="text-xs sm:text-sm md:text-md font-semibold text-black dark:text-white">
-        {category.name || "Категория"}
-      </h2>
-    </Link>
-  );
-};
+import { PerfumesSection, FlowersSection } from "./_components/HomeSections";
 
 const SectionHeader = ({ children }) => (
   <div className="pt-4 containerCustom flex mx-auto w-11/12 justify-center items-center gap-4 sm:gap-8 md:gap-16 relative z-10">
@@ -93,6 +42,8 @@ const SectionHeader = ({ children }) => (
     {children}
   </div>
 );
+
+export const revalidate = 3600;
 
 export default async function HomePage() {
   const [categories, bannersResponse] = await Promise.all([
@@ -128,26 +79,11 @@ export default async function HomePage() {
           <BannerCarousel banners={banners} />
         </div>
 
-        <div className="containerCustom flex flex-col justify-center items-center gap-3 sm:gap-5 px-4">
-          <h1 className="font-montserrat-alt text-lg sm:text-xl md:text-2xl">
-            {perfumesSection?.headline || "Shafran Perfumes"}
-          </h1>
-          <p className="text-sm text-muted-foreground text-center max-w-2xl">
-            {perfumesSection?.description ||
-              "Духи и ароматы, подобранные по настроению и случаю."}
-          </p>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 justify-items-center w-full max-w-4xl">
-            {perfumeCategories.length === 0 ? (
-              <p className="col-span-3 text-sm text-muted-foreground text-center">
-                Подкатегории парфюмерии будут доступны позже.
-              </p>
-            ) : (
-              perfumeCategories.map((category, index) =>
-                renderCategoryCard(category, SECTION_KEYS.PERFUMES, index)
-              )
-            )}
-          </div>
-        </div>
+        <PerfumesSection
+          categories={perfumeCategories}
+          headline={perfumesSection?.headline}
+          description={perfumesSection?.description}
+        />
       </CustomBackground>
 
       <CustomBackground
@@ -159,26 +95,11 @@ export default async function HomePage() {
       >
         <SectionHeader />
 
-        <div className="pb-10 containerCustom flex flex-col justify-center items-center gap-3 sm:gap-5 px-4">
-          <h1 className="font-montserrat-alt text-lg sm:text-xl md:text-2xl">
-            {flowersSection?.headline || "Shafran Flowers"}
-          </h1>
-          <p className="text-sm text-muted-foreground text-center max-w-2xl">
-            {flowersSection?.description ||
-              "Авторские букеты, составленные из сезонных цветов и эксклюзивных позиций."}
-          </p>
-          <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4 justify-items-center w-full max-w-4xl">
-            {flowerCategories.length === 0 ? (
-              <p className="col-span-3 text-sm text-muted-foreground text-center">
-                Букеты и цветочные коллекции появятся здесь позже.
-              </p>
-            ) : (
-              flowerCategories.map((category, index) =>
-                renderCategoryCard(category, SECTION_KEYS.FLOWERS, index)
-              )
-            )}
-          </div>
-        </div>
+        <FlowersSection
+          categories={flowerCategories}
+          headline={flowersSection?.headline}
+          description={flowersSection?.description}
+        />
       </CustomBackground>
     </div>
   );

@@ -10,8 +10,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { createOrder } from 'actions/post';
 import { useProfileStore } from '@/store/profileStore';
 import { Plus, Minus, Trash2 } from 'lucide-react';
+import { useTranslation } from '@/i18n';
 
 export default function Order({ gender = null }) {
+  const { t } = useTranslation();
   const items = useOrderStore((state) => state.items)
   const clearCart = useOrderStore((state) => state.clearCart)
   const resetCheckout = useOrderStore((state) => state.resetCheckout)
@@ -61,7 +63,7 @@ export default function Order({ gender = null }) {
       })
       console.log("[checkout] order submission result:", result)
       if (!result?.success) {
-        setErrorMessage(result?.error || "Не удалось оформить заказ.")
+        setErrorMessage(result?.error || t("orders.orderFailed"))
         setErrorDialogOpen(true)
         return
       }
@@ -102,16 +104,16 @@ export default function Order({ gender = null }) {
             <div className='min-h-48 md:min-h-[380px] max-w-xl w-full p-5 rounded-t-2xl space-y-4'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <h1 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>Корзина</h1>
+                  <h1 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>{t("orders.cart")}</h1>
                   <p className='text-sm text-muted-foreground'>
-                    {items.length} товаров · {totals.amount.toLocaleString()} {totals.currency}
+                    {items.length} {t("common.items")} · {totals.amount.toLocaleString()} {totals.currency}
                   </p>
                 </div>
                 <Image src="/icons/file.svg" width={46} height={46} alt="file" className='opacity-70 dark:opacity-90' />
               </div>
               <div className='max-h-48 md:max-h-[260px] overflow-y-auto custom-scroll rounded-xl border border-gray-200 dark:border-white/10 bg-white dark:bg-[#161616]'>
                 {items.length === 0 ? (
-                  <p className='text-sm text-muted-foreground text-center py-6'>Корзина пуста</p>
+                  <p className='text-sm text-muted-foreground text-center py-6'>{t("orders.cartEmpty")}</p>
                 ) : (
                   <div className="divide-y divide-gray-100 dark:divide-white/10">
                     {items.map((item) => (
@@ -163,13 +165,13 @@ export default function Order({ gender = null }) {
 
             <div className='flex justify-between items-center gap-3 max-w-xl w-full p-5 rounded-b-2xl'>
               <div>
-                <h1 className='text-lg text-gray-700 dark:text-gray-300'>Общая сумма</h1>
+                <h1 className='text-lg text-gray-700 dark:text-gray-300'>{t("orders.totalAmount")}</h1>
                 <p className='text-3xl text-primary dark:text-white font-bold'>
                   {totals.amount.toLocaleString()} {totals.currency}
                 </p>
               </div>
               <div className='text-sm text-muted-foreground text-right'>
-                <p className='text-xs text-gray-500 dark:text-gray-400'>Количество</p>
+                <p className='text-xs text-gray-500 dark:text-gray-400'>{t("common.quantity")}</p>
                 <p className='text-base font-semibold text-gray-800 dark:text-gray-100'>{totals.quantity}</p>
               </div>
             </div>
@@ -179,7 +181,7 @@ export default function Order({ gender = null }) {
             disabled={isPending || items.length === 0}
             onClick={handleSubmit}
           >
-            {isPending ? "Отправляем..." : "Оформить заказ"}
+            {isPending ? t("orders.placingOrder") : t("orders.placeOrder")}
           </Button>
           <div className='absolute -z-10 w-24 h-6 bg-black/20 dark:bg-white/10 rounded-md -top-0 left-auto right-auto blur-md' />
         </div>
@@ -190,11 +192,11 @@ export default function Order({ gender = null }) {
         <DialogContent className="w-full max-w-md rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-[#111]">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Требуется авторизация
+              {t("orders.authRequired")}
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-700 dark:text-gray-300 py-4">
-            Для оформления заказа необходимо войти в аккаунт.
+            {t("orders.authRequiredDescription")}
           </p>
           <DialogFooter className="flex flex-col gap-2 sm:flex-row">
             <Button
@@ -202,13 +204,13 @@ export default function Order({ gender = null }) {
               onClick={() => setLoginDialogOpen(false)}
               className="w-full sm:w-auto h-11 rounded-xl font-semibold"
             >
-              Отмена
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={handleLoginRedirect}
               className="w-full sm:w-auto h-11 rounded-xl font-semibold"
             >
-              Войти
+              {t("common.login")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -219,7 +221,7 @@ export default function Order({ gender = null }) {
         <DialogContent className="w-full max-w-md rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-[#111]">
           <DialogHeader>
             <DialogTitle className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Ошибка оформления заказа
+              {t("orders.orderError")}
             </DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-700 dark:text-gray-300 py-4">
@@ -230,7 +232,7 @@ export default function Order({ gender = null }) {
               onClick={() => setErrorDialogOpen(false)}
               className="w-full h-11 rounded-xl font-semibold"
             >
-              Понятно
+              {t("common.ok")}
             </Button>
           </DialogFooter>
         </DialogContent>

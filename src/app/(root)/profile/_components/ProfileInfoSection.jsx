@@ -16,12 +16,14 @@ import {
 import { updateProfileDetails } from '../actions';
 import { useRouter } from 'next/navigation';
 import ForgotPasswordModal from '@/components/shared/ForgotPasswordModal';
+import { useTranslation } from "@/i18n";
 
 export default function ProfileInfoSection({ profile = {} }) {
   const router = useRouter();
   const [isForgotModalOpen, setForgotModalOpen] = useState(false);
   const [status, setStatus] = useState(null);
   const [isPending, startTransition] = useTransition();
+  const { t } = useTranslation();
 
   const initialForm = useMemo(
     () => ({
@@ -73,10 +75,10 @@ export default function ProfileInfoSection({ profile = {} }) {
     startTransition(async () => {
       const result = await updateProfileDetails(formData);
       if (result?.success) {
-        showMessage("success", "Профиль обновлён.");
+        showMessage("success", t("profile.profileUpdated"));
         router.refresh();
       } else {
-        showMessage("error", result?.error || "Не удалось сохранить изменения.");
+        showMessage("error", result?.error || t("profile.profileUpdateFailed"));
       }
     });
   };
@@ -90,9 +92,9 @@ export default function ProfileInfoSection({ profile = {} }) {
     <div className="space-y-4 w-full">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-xl sm:text-2xl font-bold text-foreground">Профиль</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-foreground">{t("profile.profile")}</h2>
           <p className="text-sm text-muted-foreground mt-1">
-            Обновите личную информацию
+            {t("profile.updatePersonalInfo")}
           </p>
         </div>
         <Button
@@ -101,15 +103,15 @@ export default function ProfileInfoSection({ profile = {} }) {
           className="text-sm text-blue-600 hover:text-blue-700 hover:bg-transparent"
           onClick={() => setForgotModalOpen(true)}
         >
-          Забыли пароль?
+          {t("auth.forgotPassword")}
         </Button>
       </div>
 
       <Card className="border-border/50 shadow-sm">
         <CardHeader className="pb-4 space-y-1">
-          <CardTitle className="text-base sm:text-lg">Личная информация</CardTitle>
+          <CardTitle className="text-base sm:text-lg">{t("profile.personalInfo")}</CardTitle>
           <CardDescription className="text-xs sm:text-sm">
-            Измените данные и сохраните их на Billz и нашем сервере
+            {t("profile.personalInfoDescription")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -118,31 +120,31 @@ export default function ProfileInfoSection({ profile = {} }) {
               <div className="space-y-2">
                 <Label htmlFor="first_name" className="flex items-center gap-2 text-sm font-medium">
                   <User className="w-4 h-4 text-muted-foreground" />
-                  Имя
+                  {t("auth.firstName")}
                 </Label>
                 <Input
                   id="first_name"
                   value={formData.first_name}
                   onChange={handleChange("first_name")}
-                  placeholder="Имя"
+                  placeholder={t("auth.firstName")}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="last_name" className="flex items-center gap-2 text-sm font-medium">
                   <User className="w-4 h-4 text-muted-foreground" />
-                  Фамилия
+                  {t("auth.lastName")}
                 </Label>
                 <Input
                   id="last_name"
                   value={formData.last_name}
                   onChange={handleChange("last_name")}
-                  placeholder="Фамилия"
+                  placeholder={t("auth.lastName")}
                 />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="phone_number" className="flex items-center gap-2 text-sm font-medium">
                   <Phone className="w-4 h-4 text-muted-foreground" />
-                  Телефон
+                  {t("common.phone")}
                 </Label>
                 <Input
                   id="phone_number"
@@ -154,18 +156,18 @@ export default function ProfileInfoSection({ profile = {} }) {
               <div className="space-y-2">
                 <Label htmlFor="gender" className="flex items-center gap-2 text-sm font-medium">
                   <Users className="w-4 h-4 text-muted-foreground" />
-                  Пол
+                  {t("auth.gender")}
                 </Label>
                 <Select
                   value={normalizeGender(formData.gender)}
                   onValueChange={(value) => setFormData((prev) => ({ ...prev, gender: value }))}
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Выберите пол" />
+                    <SelectValue placeholder={t("auth.selectGender")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="MALE">Мужской</SelectItem>
-                    <SelectItem value="FEMALE">Женский</SelectItem>
+                    <SelectItem value="MALE">{t("common.male")}</SelectItem>
+                    <SelectItem value="FEMALE">{t("common.female")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -189,10 +191,10 @@ export default function ProfileInfoSection({ profile = {} }) {
                 {isPending ? (
                   <>
                     <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    Сохраняем...
+                    {t("common.saving")}
                   </>
                 ) : (
-                  "Сохранить изменения"
+                  t("profile.saveChanges")
                 )}
               </Button>
               <Button
@@ -202,7 +204,7 @@ export default function ProfileInfoSection({ profile = {} }) {
                 onClick={handleReset}
                 className="flex-1 sm:flex-none"
               >
-                Отменить
+                {t("common.cancel")}
               </Button>
             </div>
           </form>

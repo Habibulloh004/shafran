@@ -10,6 +10,7 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { collectGalleryItems, resolveHeroImage } from "@/lib/media";
 import { useOrderStore } from "@/store/orderStore";
+import { useTranslation } from "@/i18n";
 
 const FALLBACK_IMAGE = "/img/res1.webp";
 
@@ -20,6 +21,7 @@ export default function ProductItem({
   genderParam,
   categoryIdOverride,
 }) {
+  const { t } = useTranslation();
   const {
     id,
     name,
@@ -124,14 +126,14 @@ export default function ProductItem({
           {gender && (
             <p className="text-[10px] uppercase tracking-wide line-clamp-1 md:text-xs text-primary dark:text-white/60">
               {gender === "male"
-                ? "Для него"
+                ? t("common.forHim")
                 : gender === "female"
-                ? "Для неё"
-                : "Унисекс"}
+                ? t("common.forHer")
+                : t("common.unisex")}
             </p>
           )}
           <h1 className="text-xs line-clamp-2 md:text-sm lg:text-base font-semibold text-foreground dark:text-white">
-            {name || slug || "Без названия"}
+            {name || slug || t("common.noName")}
           </h1>
         </div>
         <div className="flex justify-between items-center gap-2">

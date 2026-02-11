@@ -10,16 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getData } from "../../../../actions/get";
-
-const statusOptions = [
-  { value: "all", label: "Barchasi" },
-  { value: "pending", label: "Kutilmoqda" },
-  { value: "processing", label: "Jarayonda" },
-  { value: "shipped", label: "Yo'lda" },
-  { value: "delivered", label: "Yetkazildi" },
-  { value: "cancelled", label: "Bekor qilindi" },
-];
+import { apiGet } from "@/lib/api/client";
+import { useTranslation } from "@/i18n";
 
 const statusColors = {
   pending: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
@@ -29,59 +21,61 @@ const statusColors = {
   cancelled: "bg-red-500/10 text-red-600 dark:text-red-400",
 };
 
-const statusLabels = {
-  pending: "Kutilmoqda",
-  processing: "Jarayonda",
-  shipped: "Yo'lda",
-  delivered: "Yetkazildi",
-  cancelled: "Bekor qilindi",
-};
-
 export default function OrdersPage() {
+  const { t } = useTranslation();
+
+  const statusOptions = [
+    { value: "all", label: t("admin.all") },
+    { value: "pending", label: t("admin.pending") },
+    { value: "processing", label: t("admin.processing") },
+    { value: "shipped", label: t("admin.shipped") },
+    { value: "delivered", label: t("admin.delivered") },
+    { value: "cancelled", label: t("admin.cancelled") },
+  ];
+
+  const statusLabels = {
+    pending: t("admin.pending"),
+    processing: t("admin.processing"),
+    shipped: t("admin.shipped"),
+    delivered: t("admin.delivered"),
+    cancelled: t("admin.cancelled"),
+  };
+
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [pagination, setPagination] = useState({ current_page: 1, total_items: 0, items_per_page: 50 });
+  const [page, setPage] = useState(1);
 
-  // Buyurtmalarni Server Action orqali yuklash
   const fetchOrders = async () => {
     try {
-      // Backend API dan buyurtmalarni olish
-      const data = await getData({
-        endpoint: "/api/orders/",
-        tag: "orders",
-        revalidate: 0
-      });
-      console.log("Buyurtmalar yuklandi:", data);
-      // API dan kelgan ma'lumotlarni formatlash
-      const ordersList = data?.data || data || [];
-      const formattedOrders = ordersList.map((order) => ({
-        id: order.id || `ORD-${String(order.uuid || "").slice(0, 6)}`,
-        customer: order.user?.display_name || order.customer_name || "Noma'lum",
-        phone: order.user?.phone || order.phone || "-",
-        items: order.items?.length || order.items_count || 0,
-        total: formatPrice(order.total_amount || order.total || 0),
-        status: order.status || "pending",
-        payment: order.payment_method || "Noma'lum",
-        date: formatDate(order.created_at || order.createdAt),
-      }));
-      setOrders(formattedOrders.length > 0 ? formattedOrders : getDemoOrders());
+      setLoading(true);
+      const params = new URLSearchParams({ page: String(page), limit: "50" });
+      if (statusFilter !== "all") {
+        params.set("status", statusFilter);
+      }
+      if (searchQuery.trim()) {
+        params.set("search", searchQuery.trim());
+      }
+
+      const data = await apiGet(`/api/admin/orders?${params.toString()}`);
+      const ordersList = data?.data || [];
+      setPagination(data?.pagination || { current_page: 1, total_items: 0, items_per_page: 50 });
+      setOrders(ordersList);
     } catch (error) {
-      console.error("Buyurtmalarni yuklashda xatolik:", error);
-      // Xatolik bo'lsa demo ma'lumotlarni ko'rsatamiz
-      setOrders(getDemoOrders());
+      console.error(t("admin.ordersLoadError"), error);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
   };
 
-  // Narxni formatlash
   const formatPrice = (price) => {
-    if (typeof price === "string") return price;
+    if (price == null) return "0 UZS";
     return new Intl.NumberFormat("uz-UZ").format(price) + " UZS";
   };
 
-  // Sanani formatlash
   const formatDate = (dateStr) => {
     if (!dateStr) return "-";
     try {
@@ -98,85 +92,19 @@ export default function OrdersPage() {
     }
   };
 
-  // Demo ma'lumotlar (API ishlamagan holat uchun)
-  const getDemoOrders = () => [
-    {
-      id: "ORD-001",
-      customer: "Alisher Karimov",
-      phone: "+998 90 123 45 67",
-      items: 3,
-      total: "450,000 UZS",
-      status: "pending",
-      payment: "Naqd",
-      date: "2024-12-13 14:30",
-    },
-    {
-      id: "ORD-002",
-      customer: "Madina Rahimova",
-      phone: "+998 91 234 56 78",
-      items: 5,
-      total: "890,000 UZS",
-      status: "delivered",
-      payment: "Karta",
-      date: "2024-12-13 12:15",
-    },
-    {
-      id: "ORD-003",
-      customer: "Bobur Toshmatov",
-      phone: "+998 93 345 67 89",
-      items: 2,
-      total: "1,200,000 UZS",
-      status: "processing",
-      payment: "Payme",
-      date: "2024-12-12 18:45",
-    },
-    {
-      id: "ORD-004",
-      customer: "Nilufar Yusupova",
-      phone: "+998 94 456 78 90",
-      items: 1,
-      total: "320,000 UZS",
-      status: "shipped",
-      payment: "Naqd",
-      date: "2024-12-12 16:20",
-    },
-    {
-      id: "ORD-005",
-      customer: "Sardor Abdullayev",
-      phone: "+998 95 567 89 01",
-      items: 4,
-      total: "650,000 UZS",
-      status: "cancelled",
-      payment: "Karta",
-      date: "2024-12-11 10:00",
-    },
-    {
-      id: "ORD-006",
-      customer: "Aziza Mahmudova",
-      phone: "+998 97 678 90 12",
-      items: 2,
-      total: "780,000 UZS",
-      status: "delivered",
-      payment: "Payme",
-      date: "2024-12-10 15:30",
-    },
-  ];
-
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [page, statusFilter]);
 
-  const filteredOrders = orders.filter((order) => {
-    const matchesSearch =
-      order.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.phone.includes(searchQuery);
-    const matchesStatus =
-      statusFilter === "all" || order.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setPage(1);
+    fetchOrders();
+  };
 
-  if (loading) {
+  const totalPages = Math.ceil(pagination.total_items / pagination.items_per_page);
+
+  if (loading && orders.length === 0) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -189,15 +117,14 @@ export default function OrdersPage() {
       {/* Header */}
       <div className="flex flex-col gap-4">
         <div>
-          <h2 className="text-xl font-semibold text-foreground">Buyurtmalar</h2>
+          <h2 className="text-xl font-semibold text-foreground">{t("admin.orders")}</h2>
           <p className="text-sm text-muted-foreground">
-            Jami {orders.length} ta buyurtma
+            {t("admin.totalOrders", { count: pagination.total_items })}
           </p>
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          {/* Search */}
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1 max-w-sm">
             <svg
               className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground"
@@ -213,17 +140,16 @@ export default function OrdersPage() {
               />
             </svg>
             <Input
-              placeholder="ID, mijoz yoki telefon..."
+              placeholder={t("admin.orderNumber")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
             />
           </div>
 
-          {/* Status Filter */}
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <Select value={statusFilter} onValueChange={(val) => { setStatusFilter(val); setPage(1); }}>
             <SelectTrigger className="w-full sm:w-48">
-              <SelectValue placeholder="Status" />
+              <SelectValue placeholder={t("common.status")} />
             </SelectTrigger>
             <SelectContent>
               {statusOptions.map((option) => (
@@ -233,7 +159,11 @@ export default function OrdersPage() {
               ))}
             </SelectContent>
           </Select>
-        </div>
+
+          <Button type="submit" variant="outline" size="sm">
+            {t("common.search")}
+          </Button>
+        </form>
       </div>
 
       {/* Orders Table */}
@@ -242,92 +172,54 @@ export default function OrdersPage() {
           <table className="w-full">
             <thead className="bg-muted/50">
               <tr>
-                <th className="text-left p-4 text-sm font-medium text-muted-foreground">
-                  Buyurtma
-                </th>
-                <th className="text-left p-4 text-sm font-medium text-muted-foreground">
-                  Mijoz
-                </th>
-                <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden md:table-cell">
-                  Mahsulotlar
-                </th>
-                <th className="text-left p-4 text-sm font-medium text-muted-foreground">
-                  Summa
-                </th>
-                <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden lg:table-cell">
-                  To'lov
-                </th>
-                <th className="text-left p-4 text-sm font-medium text-muted-foreground">
-                  Status
-                </th>
-                <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden lg:table-cell">
-                  Sana
-                </th>
-                <th className="text-right p-4 text-sm font-medium text-muted-foreground">
-                  Amallar
-                </th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground">{t("admin.order")}</th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground">{t("admin.customer")}</th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden md:table-cell">{t("admin.products")}</th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground">{t("common.amount")}</th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden lg:table-cell">{t("admin.paymentCol")}</th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground">{t("common.status")}</th>
+                <th className="text-left p-4 text-sm font-medium text-muted-foreground hidden lg:table-cell">{t("common.date")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {filteredOrders.length === 0 ? (
+              {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-muted-foreground">
-                    Buyurtma topilmadi
+                  <td colSpan={7} className="p-8 text-center text-muted-foreground">
+                    {t("admin.orderNotFound")}
                   </td>
                 </tr>
               ) : (
-                filteredOrders.map((order) => (
+                orders.map((order) => (
                   <tr key={order.id} className="hover:bg-muted/30 transition-colors">
                     <td className="p-4">
-                      <span className="font-medium text-foreground">{order.id}</span>
+                      <span className="font-medium text-foreground">{order.order_number}</span>
                     </td>
                     <td className="p-4">
                       <div>
-                        <p className="font-medium text-foreground">{order.customer}</p>
-                        <p className="text-sm text-muted-foreground">{order.phone}</p>
+                        <p className="font-medium text-foreground">
+                          {order.user
+                            ? `${order.user.first_name} ${order.user.last_name}`
+                            : t("common.unknown")}
+                        </p>
+                        <p className="text-sm text-muted-foreground">{order.user?.phone || "-"}</p>
                       </div>
                     </td>
                     <td className="p-4 text-sm text-foreground hidden md:table-cell">
-                      {order.items} ta
+                      {order.items?.length || 0} {t("common.items")}
                     </td>
                     <td className="p-4 text-sm font-medium text-foreground">
-                      {order.total}
+                      {formatPrice(order.total_amount)}
                     </td>
                     <td className="p-4 text-sm text-foreground hidden lg:table-cell">
-                      {order.payment}
+                      {order.payment_method || "-"}
                     </td>
                     <td className="p-4">
-                      <span
-                        className={`text-xs px-2 py-1 rounded-full ${statusColors[order.status]}`}
-                      >
-                        {statusLabels[order.status]}
+                      <span className={`text-xs px-2 py-1 rounded-full ${statusColors[order.status] || ""}`}>
+                        {statusLabels[order.status] || order.status}
                       </span>
                     </td>
                     <td className="p-4 text-sm text-muted-foreground hidden lg:table-cell">
-                      {order.date}
-                    </td>
-                    <td className="p-4 text-right">
-                      <Button variant="ghost" size="sm">
-                        <svg
-                          className="w-4 h-4"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
-                          />
-                        </svg>
-                      </Button>
+                      {formatDate(order.placed_at)}
                     </td>
                   </tr>
                 ))
@@ -337,28 +229,53 @@ export default function OrdersPage() {
         </div>
       </div>
 
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page <= 1}
+            onClick={() => setPage(page - 1)}
+          >
+            {t("common.previous")}
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            {page} / {totalPages}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={page >= totalPages}
+            onClick={() => setPage(page + 1)}
+          >
+            {t("common.next")}
+          </Button>
+        </div>
+      )}
+
       {/* Summary Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-sm text-muted-foreground">Kutilmoqda</p>
+          <p className="text-sm text-muted-foreground">{t("admin.pending")}</p>
           <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
             {orders.filter((o) => o.status === "pending").length}
           </p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-sm text-muted-foreground">Jarayonda</p>
+          <p className="text-sm text-muted-foreground">{t("admin.processing")}</p>
           <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
             {orders.filter((o) => o.status === "processing").length}
           </p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-sm text-muted-foreground">Yetkazildi</p>
+          <p className="text-sm text-muted-foreground">{t("admin.delivered")}</p>
           <p className="text-2xl font-bold text-green-600 dark:text-green-400">
             {orders.filter((o) => o.status === "delivered").length}
           </p>
         </div>
         <div className="bg-card border border-border rounded-xl p-4">
-          <p className="text-sm text-muted-foreground">Bekor qilindi</p>
+          <p className="text-sm text-muted-foreground">{t("admin.cancelled")}</p>
           <p className="text-2xl font-bold text-red-600 dark:text-red-400">
             {orders.filter((o) => o.status === "cancelled").length}
           </p>

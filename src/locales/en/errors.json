@@ -1,0 +1,9 @@
+{
+  "pageNotFound": "Page not found",
+  "notFoundTitle": "404 — Not found",
+  "notFoundDescription": "Unfortunately, the page you are looking for does not exist, has been removed, or is temporarily unavailable.",
+  "errorLabel": "Error",
+  "somethingWentWrong": "Something went wrong",
+  "unexpectedError": "An unexpected error occurred. Please try again.",
+  "networkError": "A network error occurred"
+}

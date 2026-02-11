@@ -13,37 +13,39 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { registerUser } from "actions/post";
-
-const RegisterSchema = z.object({
-  first_name: z
-    .string()
-    .min(2, { message: "Имя обязательно и должно содержать не менее 2 символов." }),
-  last_name: z
-    .string()
-    .min(2, { message: "Фамилия обязательна и должна содержать не менее 2 символов." }),
-  phone_number: z
-    .string()
-    .min(13, { message: "Неверный номер телефона" })
-    .max(14, { message: "Неверный номер телефона" }),
-  password: z
-    .string()
-    .min(6, { message: "Пароль должен содержать не менее 6 символов." }),
-  date_of_birth: z.string().refine((value) => {
-    if (!value) return false;
-    const date = new Date(value);
-    return !Number.isNaN(date.getTime());
-  }, "Выберите дату рождения"),
-  gender: z.enum(["1", "2"], {
-    errorMap: () => ({
-      message: "Выберите пол.",
-    }),
-  }),
-});
+import { useTranslation } from "@/i18n";
 
 export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const router = useRouter();
+  const { t } = useTranslation();
+
+  const RegisterSchema = z.object({
+    first_name: z
+      .string()
+      .min(2, { message: t("auth.firstNameRequired") }),
+    last_name: z
+      .string()
+      .min(2, { message: t("auth.lastNameRequired") }),
+    phone_number: z
+      .string()
+      .min(13, { message: t("auth.invalidPhone") })
+      .max(14, { message: t("auth.invalidPhone") }),
+    password: z
+      .string()
+      .min(6, { message: t("auth.passwordMinLength") }),
+    date_of_birth: z.string().refine((value) => {
+      if (!value) return false;
+      const date = new Date(value);
+      return !Number.isNaN(date.getTime());
+    }, t("auth.selectDateOfBirth")),
+    gender: z.enum(["1", "2"], {
+      errorMap: () => ({
+        message: t("auth.selectGenderError"),
+      }),
+    }),
+  });
 
   const form = useForm({
     resolver: zodResolver(RegisterSchema),
@@ -81,7 +83,7 @@ export default function RegisterPage() {
       const message =
         error?.details?.error?.message ||
         error?.message ||
-        "Не удалось зарегистрироваться. Попробуйте ещё раз.";
+        t("auth.registerFailed");
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
@@ -114,8 +116,8 @@ export default function RegisterPage() {
             sizes="(max-width: 768px) 75vw, (max-width: 1200px) 50vw, 33vw"
           />
           <div className="flex justify-center items-center gap-4 flex-col px-6 py-4 backdrop-blur-sm shadow-[0px_0px_21.6px_-7px_#966877] w-full md:w-2/3 lg:w-10/12 xl:w-3/4 2xl:w-2/3  rounded-[10px] min-h-56 bg-[#151515BF]">
-            <h1 className="text-2xl text-white">Регистрация</h1>
-            <p className="text-white/30">Заполните все поля чтобы создать аккаунт</p>
+            <h1 className="text-2xl text-white">{t("auth.registerTitle")}</h1>
+            <p className="text-white/30">{t("auth.registerSubtitle")}</p>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -126,8 +128,8 @@ export default function RegisterPage() {
                     fieldType={FormFieldType.INPUT}
                     control={form.control}
                     name="first_name"
-                    placeholder={"Имя"}
-                    label={"Имя"}
+                    placeholder={t("auth.firstName")}
+                    label={t("auth.firstName")}
                     inputClass="text-white rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
                     disabled={isLoading}
                   />
@@ -136,8 +138,8 @@ export default function RegisterPage() {
                     fieldType={FormFieldType.INPUT}
                     control={form.control}
                     name="last_name"
-                    placeholder={"Фамилия"}
-                    label={"Фамилия"}
+                    placeholder={t("auth.lastName")}
+                    label={t("auth.lastName")}
                     inputClass="text-white rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
                     disabled={isLoading}
                   />
@@ -147,8 +149,8 @@ export default function RegisterPage() {
                   fieldType={FormFieldType.PHONE_INPUT}
                   control={form.control}
                   name="phone_number"
-                  placeholder={"Введите номер телефона"}
-                  label={"Номер телефона"}
+                  placeholder={t("auth.enterPhone")}
+                  label={t("auth.phoneNumber")}
                   inputClass="text-white w-full"
                   disabled={isLoading}
                 />
@@ -157,8 +159,8 @@ export default function RegisterPage() {
                   fieldType={FormFieldType.INPUT}
                   control={form.control}
                   name="password"
-                  placeholder={"Введите пароль"}
-                  label={"Пароль"}
+                  placeholder={t("auth.enterPassword")}
+                  label={t("auth.password")}
                   inputType="password"
                   inputClass="text-white rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
                   disabled={isLoading}
@@ -169,8 +171,8 @@ export default function RegisterPage() {
                     fieldType={FormFieldType.INPUT}
                     control={form.control}
                     name="date_of_birth"
-                    placeholder={"Дата рождения"}
-                    label={"Дата рождения"}
+                    placeholder={t("auth.dateOfBirth")}
+                    label={t("auth.dateOfBirth")}
                     inputType="date"
                     inputClass="text-white rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
                     disabled={isLoading}
@@ -180,11 +182,11 @@ export default function RegisterPage() {
                     fieldType={FormFieldType.SELECT}
                     control={form.control}
                     name="gender"
-                    placeholder="Выберите пол"
-                    label="Пол"
+                    placeholder={t("auth.selectGender")}
+                    label={t("auth.gender")}
                     options={[
-                      { value: "1", label: "Мужской" },
-                      { value: "2", label: "Женский" },
+                      { value: "1", label: t("common.male") },
+                      { value: "2", label: t("common.female") },
                     ]}
                     className="text-white h-10 sm:h-11 md:h-12 bg-transparent border [&>span]:text-white"
                     disabled={isLoading}
@@ -211,16 +213,16 @@ export default function RegisterPage() {
                     text-white bg-transparent hover:bg-transparent cursor-pointer border border-input w-full p-2 sm:p-3 md:p-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base transition-all duration-200"
                   >
                     {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {isLoading ? "Отправка..." : "Регистрация"}
+                    {isLoading ? t("common.sending") : t("auth.registerTitle")}
                   </button>
 
                   <p className="text-sm sm:text-base text-center text-gray-300">
-                    Уже есть аккаунт?{" "}
+                    {t("auth.hasAccount")}{" "}
                     <Link
                       href="/login"
                       className="text-blue-400 hover:text-blue-300 hover:underline font-medium transition-colors"
                     >
-                      Войти
+                      {t("common.login")}
                     </Link>
                   </p>
                 </div>

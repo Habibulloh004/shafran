@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/store/authStore';
+import { useTranslation } from "@/i18n";
 
 const formatOrderAmount = (order) => {
   if (!order) return null;
@@ -34,7 +35,7 @@ const formatOrderAmount = (order) => {
 
 const formatOrderDate = (order) => {
   const dateString = order?.placed_at || order?.created_at || order?.date;
-  if (!dateString) return "—";
+  if (!dateString) return "\u2014";
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) return dateString;
   return date.toLocaleString(undefined, {
@@ -46,7 +47,7 @@ const formatOrderDate = (order) => {
 
 const formatOrderTime = (order) => {
   const dateString = order?.placed_at || order?.created_at || order?.date;
-  if (!dateString) return "—";
+  if (!dateString) return "\u2014";
   const date = new Date(dateString);
   if (Number.isNaN(date.getTime())) return dateString;
   return date.toLocaleTimeString(undefined, {
@@ -62,6 +63,7 @@ export default function OrdersSection() {
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const user = useAuthStore((state) => state.user);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -80,7 +82,7 @@ export default function OrdersSection() {
         });
         const payload = await response.json();
         if (!response.ok || !payload?.success) {
-          throw new Error(payload?.error || 'Не удалось загрузить заказы.');
+          throw new Error(payload?.error || t("profile.orderLoadFailed"));
         }
 
         const rawOrders = Array.isArray(payload?.data)
@@ -93,7 +95,7 @@ export default function OrdersSection() {
       } catch (fetchError) {
         console.error('[OrdersSection] Failed to load orders', fetchError);
         setOrders([]);
-        setErrorState(fetchError?.message || 'Не удалось загрузить заказы.');
+        setErrorState(fetchError?.message || t("profile.orderLoadFailed"));
       } finally {
         setLoadingState(false);
       }
@@ -113,9 +115,9 @@ export default function OrdersSection() {
   return (
     <div className="space-y-4 w-full">
       <div>
-        <h2 className="text-xl sm:text-2xl font-bold text-foreground">Профиль</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-foreground">{t("profile.profile")}</h2>
         <p className="text-sm text-muted-foreground mt-1 hidden sm:block">
-          История ваших заказов
+          {t("profile.orderHistory")}
         </p>
       </div>
 
@@ -125,10 +127,10 @@ export default function OrdersSection() {
             <div>
               <CardTitle className="text-base sm:text-lg flex items-center gap-2">
                 <Package className="w-5 h-5 text-primary" />
-                Мои заказы
+                {t("profile.myOrders")}
               </CardTitle>
               <CardDescription className="text-xs sm:text-sm mt-1">
-                Отслеживайте статус ваших заказов
+                {t("profile.trackOrders")}
               </CardDescription>
             </div>
           </div>
@@ -138,11 +140,11 @@ export default function OrdersSection() {
             <p className="text-sm text-destructive px-6 py-4">{errorState}</p>
           ) : loadingState ? (
             <p className="text-sm text-muted-foreground px-6 py-4">
-              Загружаем заказы...
+              {t("profile.loadingOrders")}
             </p>
           ) : orders.length === 0 ? (
             <p className="text-sm text-muted-foreground px-6 py-10">
-              Вы ещё не оформляли заказы.
+              {t("profile.noOrders")}
             </p>
           ) : (
             <>
@@ -150,11 +152,11 @@ export default function OrdersSection() {
                 <Table>
                   <TableHeader>
                     <TableRow className="hover:bg-transparent">
-                      <TableHead className="font-semibold">Номер заказа</TableHead>
-                      <TableHead className="font-semibold">Дата</TableHead>
-                      <TableHead className="font-semibold">Время</TableHead>
-                      <TableHead className="font-semibold">Сумма</TableHead>
-                      <TableHead className="font-semibold">Оплата</TableHead>
+                      <TableHead className="font-semibold">{t("profile.orderNumber")}</TableHead>
+                      <TableHead className="font-semibold">{t("common.date")}</TableHead>
+                      <TableHead className="font-semibold">{t("common.time")}</TableHead>
+                      <TableHead className="font-semibold">{t("common.amount")}</TableHead>
+                      <TableHead className="font-semibold">{t("profile.payment")}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -168,7 +170,7 @@ export default function OrdersSection() {
                         }}
                       >
                         <TableCell className="font-medium">
-                          {order?.order_number || order?.orderNumber || "—"}
+                          {order?.order_number || order?.orderNumber || "\u2014"}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {formatOrderDate(order)}
@@ -181,7 +183,7 @@ export default function OrdersSection() {
                           {order?.currency || order?.total?.currency || ""}
                         </TableCell>
                         <TableCell className="text-muted-foreground uppercase">
-                          {(order?.payment_method || order?.paymentMethod || "—").toString()}
+                          {(order?.payment_method || order?.paymentMethod || "\u2014").toString()}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -201,28 +203,28 @@ export default function OrdersSection() {
                   >
                     <div className="flex items-center justify-between">
                       <span className="font-semibold text-sm">
-                        {order?.order_number || order?.orderNumber || "—"}
+                        {order?.order_number || order?.orderNumber || "\u2014"}
                       </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-sm">
                       <div>
-                        <span className="text-muted-foreground text-xs">Дата:</span>
+                        <span className="text-muted-foreground text-xs">{t("common.date")}:</span>
                         <p className="font-medium">{formatOrderDate(order)}</p>
                       </div>
                       <div>
-                        <span className="text-muted-foreground text-xs">Время:</span>
+                        <span className="text-muted-foreground text-xs">{t("common.time")}:</span>
                         <p className="font-medium">{formatOrderTime(order)}</p>
                       </div>
                     </div>
                     <div className="grid text-sm">
                       <div className="text-right">
-                        <span className="text-muted-foreground text-xs">Сумма:</span>
-                        <p className="font-semibold">{formatOrderAmount(order) || "—"}</p>
+                        <span className="text-muted-foreground text-xs">{t("common.amount")}:</span>
+                        <p className="font-semibold">{formatOrderAmount(order) || "\u2014"}</p>
                       </div>
                       <div className="text-right">
-                        <span className="text-muted-foreground text-xs">Оплата:</span>
+                        <span className="text-muted-foreground text-xs">{t("profile.payment")}:</span>
                         <p className="font-semibold uppercase">
-                          {(order?.payment_method || order?.paymentMethod || "—").toString()}
+                          {(order?.payment_method || order?.paymentMethod || "\u2014").toString()}
                         </p>
                       </div>
                     </div>
@@ -237,10 +239,10 @@ export default function OrdersSection() {
         <DialogContent className="max-w-3xl w-full">
           <DialogHeader>
             <DialogTitle>
-              Заказ {selectedOrder?.order_number || selectedOrder?.orderNumber || "—"}
+              {t("profile.orderNumber")} {selectedOrder?.order_number || selectedOrder?.orderNumber || "\u2014"}
             </DialogTitle>
             <DialogDescription>
-              {selectedOrder?.status ? `Статус: ${selectedOrder.status}` : "Детали заказа"}
+              {selectedOrder?.status ? `${t("common.status")}: ${selectedOrder.status}` : ""}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -253,7 +255,7 @@ export default function OrdersSection() {
                   >
                     <div>
                       <p className="text-sm font-semibold">
-                        {item?.product_name || item?.name || "—"}
+                        {item?.product_name || item?.name || "\u2014"}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {item?.variant_label || item?.variant || ""}
@@ -264,22 +266,22 @@ export default function OrdersSection() {
                         {(item?.line_total || item?.unit_price || 0).toLocaleString()} {selectedOrder?.currency || item?.currency || "UZS"}
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        {item?.quantity || 1} шт.
+                        {item?.quantity || 1} {t("common.pcs")}
                       </p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <p className="text-sm text-muted-foreground">Товары не найдены.</p>
+              <p className="text-sm text-muted-foreground">{t("profile.productsNotFound")}</p>
             )}
             <section className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-muted-foreground text-xs">Дата</p>
+                <p className="text-muted-foreground text-xs">{t("common.date")}</p>
                 <p className="font-semibold">{formatOrderDate(selectedOrder)}</p>
               </div>
               <div>
-                <p className="text-muted-foreground text-xs">Сумма</p>
+                <p className="text-muted-foreground text-xs">{t("common.amount")}</p>
                 <p className="font-semibold">
                   {formatOrderAmount(selectedOrder) || "0"} {selectedOrder?.currency || selectedOrder?.total?.currency || "UZS"}
                 </p>
@@ -287,19 +289,19 @@ export default function OrdersSection() {
             </section>
             <section className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <p className="text-muted-foreground text-xs">Время</p>
+                <p className="text-muted-foreground text-xs">{t("common.time")}</p>
                 <p className="font-semibold">{formatOrderTime(selectedOrder)}</p>
               </div>
               <div>
-                <p className="text-muted-foreground text-xs">Оплата</p>
+                <p className="text-muted-foreground text-xs">{t("profile.payment")}</p>
                 <p className="font-semibold uppercase">
-                  {(selectedOrder?.payment_method || selectedOrder?.paymentMethod || "—").toString()}
+                  {(selectedOrder?.payment_method || selectedOrder?.paymentMethod || "\u2014").toString()}
                 </p>
               </div>
             </section>
             {selectedOrder?.notes && (
               <section>
-                <p className="text-muted-foreground text-xs">Примечание</p>
+                <p className="text-muted-foreground text-xs">{t("profile.note")}</p>
                 <p className="font-semibold">{selectedOrder.notes}</p>
               </section>
             )}
@@ -307,7 +309,7 @@ export default function OrdersSection() {
           <DialogFooter>
             <DialogClose asChild>
               <Button variant="outline" onClick={() => handleDialogChange(false)}>
-                Закрыть
+                {t("common.close")}
               </Button>
             </DialogClose>
           </DialogFooter>

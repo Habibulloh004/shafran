@@ -5,8 +5,11 @@ import { useAdminStore } from "@/store/adminStore";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import { useTranslation } from "@/i18n";
 
 export default function SettingsPage() {
+  const { t } = useTranslation();
   const admin = useAdminStore((state) => state.admin);
   const credentials = useAdminStore((state) => state.credentials);
   const changePassword = useAdminStore((state) => state.changePassword);
@@ -18,29 +21,23 @@ export default function SettingsPage() {
     newPassword: "",
     confirmPassword: "",
   });
-  const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
 
   // Username form
   const [usernameForm, setUsernameForm] = useState({
     newUsername: credentials?.username || "",
     password: "",
   });
-  const [usernameError, setUsernameError] = useState("");
-  const [usernameSuccess, setUsernameSuccess] = useState("");
 
   const handlePasswordChange = (e) => {
     e.preventDefault();
-    setPasswordError("");
-    setPasswordSuccess("");
 
     if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      setPasswordError("Yangi parollar mos kelmaydi");
+      toast.error(t("admin.passwordsMismatch"));
       return;
     }
 
     if (passwordForm.newPassword.length < 4) {
-      setPasswordError("Yangi parol kamida 4 ta belgi bo'lishi kerak");
+      toast.error(t("admin.passwordTooShort"));
       return;
     }
 
@@ -50,24 +47,22 @@ export default function SettingsPage() {
     );
 
     if (result.success) {
-      setPasswordSuccess(result.message);
+      toast.success(result.message);
       setPasswordForm({
         currentPassword: "",
         newPassword: "",
         confirmPassword: "",
       });
     } else {
-      setPasswordError(result.error);
+      toast.error(result.error);
     }
   };
 
   const handleUsernameChange = (e) => {
     e.preventDefault();
-    setUsernameError("");
-    setUsernameSuccess("");
 
     if (usernameForm.newUsername.length < 3) {
-      setUsernameError("Username kamida 3 ta belgi bo'lishi kerak");
+      toast.error(t("admin.usernameTooShort"));
       return;
     }
 
@@ -77,13 +72,13 @@ export default function SettingsPage() {
     );
 
     if (result.success) {
-      setUsernameSuccess(result.message);
+      toast.success(result.message);
       setUsernameForm({
         ...usernameForm,
         password: "",
       });
     } else {
-      setUsernameError(result.error);
+      toast.error(result.error);
     }
   };
 
@@ -91,28 +86,28 @@ export default function SettingsPage() {
     <div className="space-y-6 max-w-2xl">
       {/* Header */}
       <div>
-        <h2 className="text-xl font-semibold text-foreground">Sozlamalar</h2>
+        <h2 className="text-xl font-semibold text-foreground">{t("admin.settings")}</h2>
         <p className="text-sm text-muted-foreground">
-          Admin hisobingiz sozlamalarini boshqaring
+          {t("admin.manageSettings")}
         </p>
       </div>
 
       {/* Current Info */}
       <div className="bg-card border border-border rounded-xl p-6">
-        <h3 className="font-medium text-foreground mb-4">Joriy ma'lumotlar</h3>
+        <h3 className="font-medium text-foreground mb-4">{t("admin.currentInfo")}</h3>
         <div className="space-y-3">
           <div className="flex items-center justify-between py-2 border-b border-border">
-            <span className="text-muted-foreground">Username</span>
+            <span className="text-muted-foreground">{t("admin.username")}</span>
             <span className="font-medium text-foreground">
               {credentials?.username || "admin"}
             </span>
           </div>
           <div className="flex items-center justify-between py-2 border-b border-border">
-            <span className="text-muted-foreground">Login vaqti</span>
+            <span className="text-muted-foreground">{t("admin.loginTime")}</span>
             <span className="text-foreground">
               {admin?.loginTime
                 ? new Date(admin.loginTime).toLocaleString("uz-UZ")
-                : "—"}
+                : "\u2014"}
             </span>
           </div>
         </div>
@@ -120,14 +115,14 @@ export default function SettingsPage() {
 
       {/* Change Username */}
       <div className="bg-card border border-border rounded-xl p-6">
-        <h3 className="font-medium text-foreground mb-4">Username o'zgartirish</h3>
+        <h3 className="font-medium text-foreground mb-4">{t("admin.changeUsername")}</h3>
         <form onSubmit={handleUsernameChange} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="newUsername">Yangi username</Label>
+            <Label htmlFor="newUsername">{t("admin.newUsername")}</Label>
             <Input
               id="newUsername"
               type="text"
-              placeholder="Yangi username"
+              placeholder={t("admin.newUsername")}
               value={usernameForm.newUsername}
               onChange={(e) =>
                 setUsernameForm({ ...usernameForm, newUsername: e.target.value })
@@ -137,11 +132,11 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="usernamePassword">Joriy parol</Label>
+            <Label htmlFor="usernamePassword">{t("admin.currentPassword")}</Label>
             <Input
               id="usernamePassword"
               type="password"
-              placeholder="Parolni kiriting"
+              placeholder={t("admin.enterPasswordField")}
               value={usernameForm.password}
               onChange={(e) =>
                 setUsernameForm({ ...usernameForm, password: e.target.value })
@@ -150,32 +145,20 @@ export default function SettingsPage() {
             />
           </div>
 
-          {usernameError && (
-            <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-lg p-3">
-              {usernameError}
-            </div>
-          )}
-
-          {usernameSuccess && (
-            <div className="bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm rounded-lg p-3">
-              {usernameSuccess}
-            </div>
-          )}
-
-          <Button type="submit">Username o'zgartirish</Button>
+          <Button type="submit">{t("admin.changeUsername")}</Button>
         </form>
       </div>
 
       {/* Change Password */}
       <div className="bg-card border border-border rounded-xl p-6">
-        <h3 className="font-medium text-foreground mb-4">Parol o'zgartirish</h3>
+        <h3 className="font-medium text-foreground mb-4">{t("admin.changePassword")}</h3>
         <form onSubmit={handlePasswordChange} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="currentPassword">Joriy parol</Label>
+            <Label htmlFor="currentPassword">{t("admin.currentPassword")}</Label>
             <Input
               id="currentPassword"
               type="password"
-              placeholder="Joriy parolni kiriting"
+              placeholder={t("admin.enterCurrentPassword")}
               value={passwordForm.currentPassword}
               onChange={(e) =>
                 setPasswordForm({
@@ -188,11 +171,11 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="newPassword">Yangi parol</Label>
+            <Label htmlFor="newPassword">{t("admin.newPasswordField")}</Label>
             <Input
               id="newPassword"
               type="password"
-              placeholder="Yangi parolni kiriting"
+              placeholder={t("admin.enterNewPassword")}
               value={passwordForm.newPassword}
               onChange={(e) =>
                 setPasswordForm({ ...passwordForm, newPassword: e.target.value })
@@ -202,11 +185,11 @@ export default function SettingsPage() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Yangi parolni tasdiqlash</Label>
+            <Label htmlFor="confirmPassword">{t("admin.confirmNewPassword")}</Label>
             <Input
               id="confirmPassword"
               type="password"
-              placeholder="Yangi parolni qayta kiriting"
+              placeholder={t("admin.reenterNewPassword")}
               value={passwordForm.confirmPassword}
               onChange={(e) =>
                 setPasswordForm({
@@ -218,19 +201,7 @@ export default function SettingsPage() {
             />
           </div>
 
-          {passwordError && (
-            <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-lg p-3">
-              {passwordError}
-            </div>
-          )}
-
-          {passwordSuccess && (
-            <div className="bg-green-500/10 border border-green-500/20 text-green-600 dark:text-green-400 text-sm rounded-lg p-3">
-              {passwordSuccess}
-            </div>
-          )}
-
-          <Button type="submit">Parol o'zgartirish</Button>
+          <Button type="submit">{t("admin.changePassword")}</Button>
         </form>
       </div>
 
@@ -252,8 +223,7 @@ export default function SettingsPage() {
           </svg>
           <div className="text-sm text-muted-foreground">
             <p>
-              Ma'lumotlar brauzeringizning local storage'ida saqlanadi. Boshqa
-              qurilmada kirganingizda default login/parol ishlatiladi.
+              {t("admin.settingsInfo")}
             </p>
           </div>
         </div>

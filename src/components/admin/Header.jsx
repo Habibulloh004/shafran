@@ -4,9 +4,12 @@ import { useRouter } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
 import { Button } from "@/components/ui/button";
 import { ModeToggle } from "@/components/shared/mode-toggle";
+import { useTranslation } from "@/i18n";
+import LanguageSwitcher from "@/components/shared/LanguageSwitcher";
 
 export default function Header({ onMenuClick, title }) {
   const router = useRouter();
+  const { t } = useTranslation();
   const logout = useAdminStore((state) => state.logout);
   const admin = useAdminStore((state) => state.admin);
 
@@ -31,12 +34,15 @@ export default function Header({ onMenuClick, title }) {
 
         {/* Page title */}
         <h1 className="text-lg font-semibold text-foreground">
-          {title || "Dashboard"}
+          {title || t("admin.dashboard")}
         </h1>
       </div>
 
       {/* Right side */}
       <div className="flex items-center gap-3">
+        {/* Language switcher */}
+        <LanguageSwitcher variant="compact" />
+
         {/* Theme toggle */}
         <ModeToggle />
 
@@ -60,7 +66,7 @@ export default function Header({ onMenuClick, title }) {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          <span className="hidden sm:inline">Chiqish</span>
+          <span className="hidden sm:inline">{t("common.logout")}</span>
         </Button>
       </div>
     </header>

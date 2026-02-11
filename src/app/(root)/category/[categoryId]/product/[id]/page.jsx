@@ -11,6 +11,9 @@ import ProductDetails from "./_components/ProductDetails";
 import { getBillzProduct } from "../../../../../../../actions/get";
 import { notFound } from "next/navigation";
 import { collectGalleryItems, resolveHeroImage } from "@/lib/media";
+import RelatedProductsTitle from "./_components/RelatedProductsTitle";
+
+export const revalidate = 600;
 
 const FALLBACK_MARKETING_IMAGES = [
   "/img/inf1.webp",
@@ -155,7 +158,7 @@ export default async function ProductItemPage({ params, searchParams }) {
         {relatedProducts.length > 0 && (
           <section className="containerCustom w-11/12 pt-10 space-y-4">
             <h1 className="text-center text-xl md:text-3xl font-bold">
-              {product.related_products?.title || "Похожие товары"}
+              <RelatedProductsTitle fallback={product.related_products?.title} />
             </h1>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-5">
               {relatedProducts.map((related) => (

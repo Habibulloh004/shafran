@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import ProductItem from "@/components/shared/productItem";
 import SidebarFilter from "@/components/shared/sidebarFilter";
+import { useTranslation } from "@/i18n";
 
 const PRICE_STEP_FALLBACK = 50000;
 const PARAMETER_GROUP_LIMIT = 4;
@@ -187,6 +188,7 @@ export default function CategoryProductsWithFilters({
   categoryId,
   pagination,
 }) {
+  const { t } = useTranslation();
   const priceFilter = useMemo(() => buildPriceFilter(products), [products]);
   const [selectedPrice, setSelectedPrice] = useState([
     priceFilter.min,
@@ -368,7 +370,7 @@ export default function CategoryProductsWithFilters({
         {filteredProducts.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl bg-white/60 dark:bg-black/50 border border-border/50 py-16">
             <p className="text-sm md:text-base text-muted-foreground">
-              Товары не найдены.
+              {t("common.productsNotFound")}
             </p>
           </div>
         ) : (
@@ -388,7 +390,7 @@ export default function CategoryProductsWithFilters({
         {pagination?.total_pages > 1 && (
           <div className="mt-8 flex justify-center">
             <p className="text-xs text-muted-foreground">
-              Страница {pagination.current_page} из {pagination.total_pages}
+              {t("common.page")} {pagination.current_page} {t("common.of")} {pagination.total_pages}
             </p>
           </div>
         )}

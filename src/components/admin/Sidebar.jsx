@@ -5,10 +5,11 @@ import { usePathname } from "next/navigation";
 import Image from "next/image";
 import logoDark from "@/assets/img/logoDark.svg";
 import logoLight from "@/assets/img/logoLight.svg";
+import { useTranslation } from "@/i18n";
 
 const menuItems = [
   {
-    title: "Dashboard",
+    titleKey: "admin.dashboard",
     href: "/admin",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -17,7 +18,7 @@ const menuItems = [
     ),
   },
   {
-    title: "Bannerlar",
+    titleKey: "admin.banners",
     href: "/admin/banners",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -26,7 +27,7 @@ const menuItems = [
     ),
   },
   {
-    title: "Foydalanuvchilar",
+    titleKey: "admin.users",
     href: "/admin/users",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -35,7 +36,7 @@ const menuItems = [
     ),
   },
   {
-    title: "Buyurtmalar",
+    titleKey: "admin.orders",
     href: "/admin/orders",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,7 +45,16 @@ const menuItems = [
     ),
   },
   {
-    title: "Sozlamalar",
+    titleKey: "admin.footerSettings",
+    href: "/admin/footer",
+    icon: (
+      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+      </svg>
+    ),
+  },
+  {
+    titleKey: "admin.settings",
     href: "/admin/settings",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,6 +67,7 @@ const menuItems = [
 
 export default function Sidebar({ isOpen, onClose }) {
   const pathname = usePathname();
+  const { t } = useTranslation();
 
   return (
     <>
@@ -121,7 +132,7 @@ export default function Sidebar({ isOpen, onClose }) {
                 }`}
               >
                 {item.icon}
-                <span>{item.title}</span>
+                <span>{t(item.titleKey)}</span>
               </Link>
             );
           })}
@@ -136,7 +147,7 @@ export default function Sidebar({ isOpen, onClose }) {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            <span>Saytga qaytish</span>
+            <span>{t("admin.backToSite")}</span>
           </Link>
         </div>
       </aside>

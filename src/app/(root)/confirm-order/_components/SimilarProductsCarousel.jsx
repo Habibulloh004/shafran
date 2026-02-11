@@ -8,14 +8,16 @@ import {
   CarouselPrevious,
   CarouselNext,
 } from '@/components/ui/carousel';
+import { useTranslation } from '@/i18n';
 
 export default function SimilarProductsCarousel({ products }) {
+  const { t } = useTranslation();
   if (!products || products.length === 0) return null;
 
   return (
     <section className='containerCustom w-11/12 pt-10 space-y-4'>
       <h1 className='text-center text-xl md:text-3xl font-bold'>
-        Похожие товары
+        {t("common.similarProducts")}
       </h1>
       <Carousel
         opts={{

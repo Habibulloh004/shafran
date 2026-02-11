@@ -1,0 +1,19 @@
+{
+  "cart": "Cart",
+  "cartEmpty": "Cart is empty",
+  "yourCartEmpty": "Your cart is empty",
+  "totalAmount": "Total amount",
+  "placeOrder": "Place order",
+  "placingOrder": "Placing order...",
+  "orderConfirmation": "Order confirmation",
+  "orderAccepted": "Order successfully accepted.",
+  "managersWillContact": "Our managers will contact you shortly",
+  "authRequired": "Authorization required",
+  "authRequiredDescription": "You need to log in to place an order.",
+  "orderError": "Order error",
+  "orderFailed": "Could not place order.",
+  "paymentMethod": "Payment method",
+  "cash": "Cash",
+  "clearAll": "Clear all",
+  "checkout": "Checkout"
+}

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useOrderStore } from "@/store/orderStore";
+import { useTranslation } from "@/i18n";
 const paymeLogo = "/icons/payme.jpeg";
 
 const FIELD_STYLES =
@@ -87,6 +88,7 @@ const CustomRadioItem = React.memo(
 CustomRadioItem.displayName = "CustomRadioItem";
 
 export default function CheckoutForm() {
+  const { t } = useTranslation();
   const paymentMethod = useOrderStore((state) => state.paymentMethod);
   const useBonus = useOrderStore((state) => state.useBonus);
   const bonusAmount = useOrderStore((state) => state.bonusAmount);
@@ -101,7 +103,7 @@ export default function CheckoutForm() {
 
         <div className="px-4 pt-6">
           <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-100 mb-3">
-            Способ оплаты
+            {t("orders.paymentMethod")}
           </h3>
           <div className="space-y-3">
             {/* Naqd pul */}
@@ -110,7 +112,7 @@ export default function CheckoutForm() {
               currentValue={paymentMethod}
               onChange={setPaymentMethod}
               icon={Wallet}
-              label="Наличными"
+              label={t("orders.cash")}
             />
 
             {/* Payme */}

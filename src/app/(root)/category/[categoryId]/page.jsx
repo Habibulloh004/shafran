@@ -6,7 +6,9 @@ import CategoryProductsWithFilters from "@/components/category/CategoryProductsW
 import { notFound } from "next/navigation";
 import { getBillzCategory, getBillzProducts } from "../../../../../actions/get";
 
-const FALLBACK_TITLE = "Категория";
+export const revalidate = 600;
+
+const FALLBACK_TITLE = "";
 const DEFAULT_PAGINATION = { page: 1, limit: 24 };
 
 const toCsvArray = (value) =>

@@ -1,16 +1,64 @@
 "use client"
 
 import Image from 'next/image'
-import React from 'react'
+import React, { useState, useEffect } from 'react'
 import { Separator } from '../ui/separator'
 import { usePathname } from 'next/navigation'
+import { getData } from '../../../actions/get'
+import { useTranslation } from "@/i18n"
 
 export default function Footer() {
-    const pathname = usePathname()
+  const pathname = usePathname()
+  const [settings, setSettings] = useState(null)
+  const { t } = useTranslation()
 
-  if (pathname == "/login" || pathname == "/register") {
+  useEffect(() => {
+    const fetchFooter = async () => {
+      try {
+        const data = await getData({
+          endpoint: "/api/footer",
+          tag: "footer",
+          revalidate: 0,
+        })
+        setSettings(data?.data || data || null)
+      } catch (error) {
+        console.error("Footer yuklashda xatolik:", error)
+      }
+    }
+    fetchFooter()
+  }, [])
+
+  if (pathname == "/login" || pathname == "/register" || pathname == "/forgot-password") {
     return <></>
   }
+
+  const socialLinks = []
+  if (settings?.facebook_enabled && settings?.facebook) {
+    socialLinks.push({ href: settings.facebook, icon: "/icons/facebook.svg", alt: "Facebook" })
+  }
+  if (settings?.instagram_enabled && settings?.instagram) {
+    socialLinks.push({ href: settings.instagram, icon: "/icons/instagram.svg", alt: "Instagram" })
+  }
+  if (settings?.twitter_enabled && settings?.twitter) {
+    socialLinks.push({ href: settings.twitter, icon: "/icons/twitter.svg", alt: "Twitter" })
+  }
+  if (settings?.telegram_enabled && settings?.telegram) {
+    socialLinks.push({ href: settings.telegram, icon: "/icons/telegram.svg", alt: "Telegram" })
+  }
+  if (settings?.youtube_enabled && settings?.youtube) {
+    socialLinks.push({ href: settings.youtube, icon: "/icons/youtube.svg", alt: "YouTube" })
+  }
+  if (settings?.tiktok_enabled && settings?.tiktok) {
+    socialLinks.push({ href: settings.tiktok, icon: "/icons/tiktok.svg", alt: "TikTok" })
+  }
+
+  const address = settings?.address || ""
+  const phone = settings?.phone || ""
+  const phone2 = settings?.phone2 || ""
+  const email = settings?.email || ""
+  const workingHours = settings?.working_hours || ""
+  const copyrightText = settings?.copyright_text || `© ${new Date().getFullYear()} SHAFRAN. All Rights Reserved.`
+
   return (
     <footer className='text-xs sm:text-sm md:text-md relative bg-[#F9F9F9] dark:bg-[#272727] w-full h-auto before:bg-neutral-200 dark:before:bg-[#CBCBCB] before:absolute before:-top-1 before:w-full before:h-[2px]'>
       <main className='pt-12 pb-4 space-y-5'>
@@ -35,89 +83,40 @@ export default function Footer() {
               />
             </div>
             <ul className='text-neutral-500 dark:text-[#7C7C7C]'>
-              <li>
-                Адрес: loremipsum
-              </li>
-              <li>
-                Телефон: +998 99 999-99-99
-              </li>
-              <li>
-                Почта: shafran@gmail.com
-              </li>
+              {address && <li>{t("footer.address")}: {address}</li>}
+              {phone && <li>{t("footer.phone")}: {phone}</li>}
+              {phone2 && <li>{t("footer.phone2")}: {phone2}</li>}
+              {email && <li>{t("footer.mail")}: {email}</li>}
             </ul>
           </div>
+          {workingHours && (
+            <div>
+              <h1>{t("footer.workingHours")}</h1>
+              <ul className='text-neutral-500 dark:text-[#7C7C7C]'>
+                <li>{workingHours}</li>
+              </ul>
+            </div>
+          )}
           <div>
-            <h1>Shafran</h1>
+            <h1>{t("footer.subscribe")}</h1>
             <ul className='text-neutral-500 dark:text-[#7C7C7C]'>
-              <li>
-                Shafran Selective
-              </li>
-              <li>
-                Shafran Flowers
-              </li>
-              <li>
-                Уход
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h1>Справка и поддержка</h1>
-            <ul className='text-neutral-500 dark:text-[#7C7C7C]'>
-              <li>
-                Платежи
-              </li>
-              <li>
-                Возврат продукции
-              </li>
-              <li>
-                Помощь (FAQ)
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h1>Рабочее время</h1>
-            <ul className='text-neutral-500 dark:text-[#7C7C7C]'>
-              <li>
-                Понедельник - Суббота:<br />
-                09:00 - 18:00
-              </li>
-            </ul>
-          </div>
-          <div>
-            <h1>Подпишитесь, чтобы получать <br />эксклюзивные предложения и последние новости!</h1>
-            <ul className='text-neutral-500 dark:text-[#7C7C7C]'>
-              <li>
-                Nomer telefona
-              </li>
-              <li className='flex  justify-start items-center gap-2'>
-                <div>
-                  <Image src="/icons/facebook.svg" alt="img" width={44} height={44} />
-                </div>
-                <div>
-                  <Image src="/icons/instagram.svg" alt="img" width={44} height={44} />
-                </div>
-                <div>
-                  <Image src="/icons/twitter.svg" alt="img" width={44} height={44} />
-                </div>
-              </li>
+              {phone && <li>{phone}</li>}
+              {socialLinks.length > 0 && (
+                <li className='flex justify-start items-center gap-2 mt-2'>
+                  {socialLinks.map((link) => (
+                    <a key={link.alt} href={link.href} target="_blank" rel="noopener noreferrer">
+                      <Image src={link.icon} alt={link.alt} width={44} height={44} />
+                    </a>
+                  ))}
+                </li>
+              )}
             </ul>
           </div>
         </section>
         <Separator className={"border-[1px] bg-neutral-200 dark:bg-[#CBCBCB] w-full"} />
         <section className='flex flex-wrap justify-between items-center max-w-[1440px] w-11/12 mx-auto text-neutral-400 dark:text-[#888888]'>
-          <h1>
-            © 2025 SHAFRAN. All Rights Reserved.
-          </h1>
-          <div className='flex justify-end items-center gap-10'>
-            <div>
-              Политика конфиденциальности
-            </div>
-            <div>
-              Правила и условия использования
-            </div>
-          </div>
+          <h1>{copyrightText}</h1>
         </section>
-
       </main>
     </footer>
   )

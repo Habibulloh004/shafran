@@ -1,0 +1,19 @@
+{
+  "cart": "Savat",
+  "cartEmpty": "Savat bo'sh",
+  "yourCartEmpty": "Savatingiz bo'sh",
+  "totalAmount": "Umumiy summa",
+  "placeOrder": "Buyurtma berish",
+  "placingOrder": "Yuborilmoqda...",
+  "orderConfirmation": "Buyurtmani tasdiqlash",
+  "orderAccepted": "Buyurtma qabul qilindi.",
+  "managersWillContact": "Menejerlarimiz tez orada siz bilan bog'lanadi",
+  "authRequired": "Avtorizatsiya talab qilinadi",
+  "authRequiredDescription": "Buyurtma berish uchun hisobingizga kirish kerak.",
+  "orderError": "Buyurtma xatoligi",
+  "orderFailed": "Buyurtmani amalga oshirib bo'lmadi.",
+  "paymentMethod": "To'lov usuli",
+  "cash": "Naqd pul",
+  "clearAll": "Tozalash",
+  "checkout": "Rasmiylashtirish"
+}

@@ -1,0 +1,23 @@
+<svg width="34" height="35" viewBox="0 0 34 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_d_tiktok)">
+<g clip-path="url(#clip0_tiktok)">
+<path d="M23.375 5.40332H10.625C7.5184 5.40332 5 7.92172 5 11.0283V23.7783C5 26.8849 7.5184 29.4033 10.625 29.4033H23.375C26.4816 29.4033 29 26.8849 29 23.7783V11.0283C29 7.92172 26.4816 5.40332 23.375 5.40332Z" fill="#4B4B4B"/>
+<path d="M22.2 15.4C21.3 15.4 20.5 15.1 19.8 14.5C19.2 13.9 18.8 13.1 18.8 12.2H17V19.5C17 19.9 16.8 20.3 16.6 20.6C16.3 20.9 15.9 21.1 15.4 21.1C14.5 21.1 13.7 20.3 13.7 19.4C13.7 18.5 14.5 17.7 15.4 17.7C15.6 17.7 15.7 17.7 15.9 17.8V15.6C15.7 15.6 15.6 15.6 15.4 15.6C13 15.6 11 17.5 11 19.9C11 22.3 13 24.3 15.4 24.3C17.8 24.3 19.8 22.3 19.8 19.9V16.3C20.5 16.8 21.3 17.1 22.2 17.1V15.4Z" fill="#F9F9F9"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_d_tiktok" x="0" y="0.40332" width="34" height="34" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset/>
+<feGaussianBlur stdDeviation="2.5"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.75 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_tiktok"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_tiktok" result="shape"/>
+</filter>
+<clipPath id="clip0_tiktok">
+<rect x="5" y="5.40332" width="24" height="24" rx="8" fill="white"/>
+</clipPath>
+</defs>
+</svg>

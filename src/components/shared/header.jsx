@@ -8,18 +8,23 @@ import gsap from "gsap"
 import { ScrollTrigger } from "gsap/ScrollTrigger"
 import { usePathname, useRouter } from "next/navigation"
 import CartDropdown from "./CartDropdown"
+import SearchModal from "./SearchModal"
 import Link from "next/link"
 import { useAuthStore } from "@/store/authStore"
+import { useTranslation } from "@/i18n"
+import LanguageSwitcher from "./LanguageSwitcher"
 
 gsap.registerPlugin(ScrollTrigger)
 
 export default function Header() {
   const headerRef = useRef(null)
   const [scrolled, setScrolled] = useState(false)
+  const [searchOpen, setSearchOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const user = useAuthStore((state) => state.user)
   const token = useAuthStore((state) => state.token)
+  const { t } = useTranslation()
 
   const handleProfileClick = () => {
     if (user && token) {
@@ -59,6 +64,18 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll)
   }, [])
 
+
+  // Ctrl+K / Cmd+K keyboard shortcut
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault()
+        setSearchOpen(true)
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
+  }, [])
 
   if (pathname == "/login" || pathname == "/register") {
     return <></>
@@ -107,7 +124,7 @@ export default function Header() {
 
         {/* Right side - Icons */}
         <div className="flex items-center gap-1 sm:gap-2">
-          <Button variant="icon" size="icon" className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10">
+          <Button variant="icon" size="icon" className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10" onClick={() => setSearchOpen(true)}>
             <Image
               loading="eager"
               src="/icons/searchDark.svg"
@@ -157,15 +174,17 @@ export default function Header() {
               variant="outline"
               className="h-8 sm:h-9 md:h-10 px-3 sm:px-4 md:px-5 text-xs sm:text-sm font-medium rounded-lg border border-primary/20 hover:bg-primary/10 hover:border-primary/40 transition-all"
             >
-              Kirish
+              {t("common.login")}
             </Button>
           )}
 
+          <LanguageSwitcher variant="compact" />
           <div className="w-8 h-8 sm:w-9 sm:h-9 md:w-10 md:h-10">
             <ModeToggle />
           </div>
         </div>
       </main>
+      <SearchModal open={searchOpen} onClose={() => setSearchOpen(false)} />
     </header>
   )
 }

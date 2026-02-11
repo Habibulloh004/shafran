@@ -21,12 +21,14 @@ import {
 import { useOrderStore, computeOrderTotals } from "@/store/orderStore";
 import CartItem from './CartItem';
 import Link from "next/link";
+import { useTranslation } from "@/i18n";
 
 const CartList = ({ items }) => {
+  const { t } = useTranslation();
   if (items.length === 0) {
     return (
       <div className="py-10 text-center text-sm text-muted-foreground">
-        Ваша корзина пуста
+        {t("orders.yourCartEmpty")}
       </div>
     );
   }
@@ -47,6 +49,7 @@ const CartList = ({ items }) => {
 };
 
 export default function CartDropdown() {
+  const { t } = useTranslation();
   const items = useOrderStore((state) => state.items);
   const clearCart = useOrderStore((state) => state.clearCart);
   const totals = useMemo(() => computeOrderTotals(items), [items]);
@@ -77,17 +80,17 @@ export default function CartDropdown() {
         <Link
           href="/confirm-order"
           onClick={handleGoToOrder}
-          className={`${actionWidth} h-11 rounded-2xl bg-primary/70 text-white flex items-center justify-center hover:bg-primary/60`}
+          className={`${actionWidth} h-11 rounded-2xl bg-primary/70 text-white text-sm flex items-center justify-center hover:bg-primary/60`}
         >
-          Оформить заказ
+          {t("orders.checkout")}
         </Link>
         {items.length > 0 && (
           <Button
             variant={"outline"}
-            className={`${actionWidth} h-11 rounded-2xl bg-primary/10 text-black dark:text-white`}
+            className={`${actionWidth} h-11 rounded-2xl bg-primary/10 text-sm text-black dark:text-white`}
             onClick={handleClearCart}
           >
-            Убрать всё
+            {t("orders.clearAll")}
           </Button>
         )}
       </div>
@@ -127,10 +130,10 @@ export default function CartDropdown() {
             className="mt-4 mr-6 max-md:hidden p-6 bg-white/80 dark:bg-black/80 backdrop-blur-[10px] min-w-auto md:min-w-md max-w-xl right-1/2 left-1/2"
           >
             <DropdownMenuLabel className="text-2xl text-center pb-2 border-b-2 flex flex-col gap-1">
-              <span>Корзина</span>
+              <span>{t("orders.cart")}</span>
               {totals.quantity > 0 && (
                 <span className="text-sm text-muted-foreground">
-                  {totals.quantity} товаров · {totals.amount.toLocaleString()} {totals.currency}
+                  {totals.quantity} {t("common.items")} · {totals.amount.toLocaleString()} {totals.currency}
                 </span>
               )}
             </DropdownMenuLabel>
@@ -192,7 +195,7 @@ export default function CartDropdown() {
           >
             <DialogHeader className={"p-0"}>
               <DialogTitle className="text-2xl text-center">
-                Корзина
+                {t("orders.cart")}
               </DialogTitle>
               <DialogDescription className="hidden">
                 This action cannot be undone. This will permanently delete your account
@@ -202,7 +205,7 @@ export default function CartDropdown() {
             <div className='custom-scroll pr-1 flex-1 space-y-2 w-full max-h-[calc(100vh-400px)] overflow-y-auto'>
               {items.length === 0 ? (
                 <p className="text-sm text-center text-muted-foreground py-6">
-                  Ваша корзина пуста
+                  {t("orders.yourCartEmpty")}
                 </p>
               ) : (
                 items.map((item) => (

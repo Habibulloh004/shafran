@@ -3,22 +3,26 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useAdminStore } from "@/store/adminStore";
+import { useTranslation } from "@/i18n";
 import Sidebar from "@/components/admin/Sidebar";
 import Header from "@/components/admin/Header";
-
-// Sahifa nomlari
-const pageTitles = {
-  "/admin": "Dashboard",
-  "/admin/banners": "Bannerlar",
-  "/admin/users": "Foydalanuvchilar",
-  "/admin/orders": "Buyurtmalar",
-  "/admin/settings": "Sozlamalar",
-};
 
 export default function AdminLayout({ children }) {
   const router = useRouter();
   const pathname = usePathname();
   const isAuthenticated = useAdminStore((state) => state.isAuthenticated);
+  const { t } = useTranslation();
+
+  // Sahifa nomlari
+  const pageTitles = {
+    "/admin": t("admin.dashboard"),
+    "/admin/banners": t("admin.banners"),
+    "/admin/banners/new": t("admin.newBanner"),
+    "/admin/users": t("admin.users"),
+    "/admin/orders": t("admin.orders"),
+    "/admin/footer": t("admin.footerSettings"),
+    "/admin/settings": t("admin.settings"),
+  };
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -55,7 +59,11 @@ export default function AdminLayout({ children }) {
     return null;
   }
 
-  const pageTitle = pageTitles[pathname] || "Admin";
+  const pageTitle =
+    pageTitles[pathname] ||
+    (pathname.endsWith("/edit") && pathname.includes("/banners/")
+      ? t("admin.editBanner")
+      : t("admin.adminPanel"));
 
   return (
     <div className="min-h-screen bg-background">

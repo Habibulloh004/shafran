@@ -1,0 +1,9 @@
+{
+  "pageNotFound": "Sahifa topilmadi",
+  "notFoundTitle": "404 — Topilmadi",
+  "notFoundDescription": "Afsuski, siz qidirayotgan sahifa mavjud emas, o'chirilgan yoki vaqtincha mavjud emas.",
+  "errorLabel": "Xatolik",
+  "somethingWentWrong": "Nimadir noto'g'ri ketdi",
+  "unexpectedError": "Kutilmagan xatolik yuz berdi. Iltimos, qayta urinib ko'ring.",
+  "networkError": "Tarmoq xatoligi yuz berdi"
+}

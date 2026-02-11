@@ -1,0 +1,25 @@
+<svg width="34" height="35" viewBox="0 0 34 35" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g filter="url(#filter0_d_telegram)">
+<g clip-path="url(#clip0_telegram)">
+<path d="M23.375 5.40332H10.625C7.5184 5.40332 5 7.92172 5 11.0283V23.7783C5 26.8849 7.5184 29.4033 10.625 29.4033H23.375C26.4816 29.4033 29 26.8849 29 23.7783V11.0283C29 7.92172 26.4816 5.40332 23.375 5.40332Z" fill="#4B4B4B"/>
+<path d="M22.9 12.2L20.8 22.8C20.8 22.8 20.5 23.5 19.6 23.1L15.8 20.3L14.2 19.6L11.3 18.6C11.3 18.6 10.8 18.4 10.75 18.1C10.7 17.8 11.32 17.6 11.32 17.6L21.8 13.4C21.8 13.4 22.9 12.9 22.9 13.6V12.2Z" fill="#F9F9F9"/>
+<path d="M15.8 23.1C15.8 23.1 15.6 23.08 15.4 22.5L14.2 18.5L20.8 14.7" fill="#D5D5D5"/>
+<path d="M15.8 23.1L15.8 20.3L20.8 16.4" fill="#B8B8B8"/>
+</g>
+</g>
+<defs>
+<filter id="filter0_d_telegram" x="0" y="0.40332" width="34" height="34" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+<feOffset/>
+<feGaussianBlur stdDeviation="2.5"/>
+<feComposite in2="hardAlpha" operator="out"/>
+<feColorMatrix type="matrix" values="0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.75 0"/>
+<feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_telegram"/>
+<feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_telegram" result="shape"/>
+</filter>
+<clipPath id="clip0_telegram">
+<rect x="5" y="5.40332" width="24" height="24" rx="8" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -11,23 +11,24 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useAuthStore } from "@/store/authStore";
-import ForgotPasswordModal from "@/components/shared/ForgotPasswordModal";
 import { loginUser } from "actions/post";
+import { useTranslation } from "@/i18n";
 
 export default function LoginPage() {
   const router = useRouter();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [isForgotModalOpen, setForgotModalOpen] = useState(false);
+  const { t } = useTranslation();
+
   const LoginValidation = z.object({
     phone: z
       .string()
-      .min(13, { message: "Неверный номер телефона" })
-      .max(14, { message: "Неверный номер телефона" }),
+      .min(13, { message: t("auth.invalidPhone") })
+      .max(14, { message: t("auth.invalidPhone") }),
     password: z
       .string()
-      .min(1, { message: "Введите пароль" }),
+      .min(1, { message: t("auth.enterPassword") }),
   });
 
   const form = useForm({
@@ -49,7 +50,7 @@ export default function LoginPage() {
       });
       console.log("Login response:", response);
       if (!response?.success || !response.data?.token) {
-        setErrorMessage(response?.error || "Не удалось войти. Проверьте данные.");
+        setErrorMessage(response?.error || t("auth.loginFailed"));
         return;
       }
 
@@ -62,14 +63,14 @@ export default function LoginPage() {
     } catch (error) {
       console.error("Login error", error);
       if (error?.status === 401 || error?.status === 404) {
-        setErrorMessage("Неверный номер телефона или пароль.");
+        setErrorMessage(t("auth.invalidCredentials"));
         return;
       }
 
       const message =
         error?.details?.error?.message ||
         error?.message ||
-        "Не удалось войти. Попробуйте ещё раз.";
+        t("auth.loginError");
       setErrorMessage(message);
     } finally {
       setIsLoading(false);
@@ -99,8 +100,8 @@ export default function LoginPage() {
             sizes="(max-width: 768px) 75vw, (max-width: 1200px) 50vw, 33vw"
           />
           <div className="w-full md:w-2/3 lg:w-10/12 xl:w-3/4 2xl:w-2/3 rounded-[10px] px-6 py-4 min-h-20 bg-[#151515BF] backdrop-blur-sm flex flex-col justify-centere items-center">
-            <h1 className="text-2xl text-white">Войти</h1>
-            <p className="text-white/30">Войдите в свой аккаунт</p>
+            <h1 className="text-2xl text-white">{t("auth.loginTitle")}</h1>
+            <p className="text-white/30">{t("auth.loginSubtitle")}</p>
             <Form {...form}>
               <form
                 onSubmit={form.handleSubmit(onSubmit)}
@@ -111,7 +112,7 @@ export default function LoginPage() {
                   control={form.control}
                   name="phone"
                   placeholder={"Enter phone"}
-                  label={"Номер телефона"}
+                  label={t("auth.phoneNumber")}
                   inputClass="text-white w-full"
                   disabled={isLoading}
                 />
@@ -120,8 +121,8 @@ export default function LoginPage() {
                   fieldType={FormFieldType.INPUT}
                   control={form.control}
                   name="password"
-                  placeholder={"Введите пароль"}
-                  label={"Пароль"}
+                  placeholder={t("auth.enterPassword")}
+                  label={t("auth.password")}
                   inputType="password"
                   inputClass="text-white rounded-md border-[1px] h-10 sm:h-11 md:h-12 w-full px-3 sm:px-4"
                   disabled={isLoading}
@@ -143,26 +144,25 @@ export default function LoginPage() {
                     text-white bg-primary hover:bg-primary/80 w-full p-2 sm:p-3 md:p-2 rounded-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm sm:text-base transition-all duration-200"
                   >
                     {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-                    {isLoading ? "Submiting..." : "Войти"}
+                    {isLoading ? t("common.submitting") : t("common.login")}
                   </button>
 
                   {/* Links */}
                   <div className="flex flex-col sm:flex-row gap-2 text-sm sm:text-base text-center text-gray-600">
-                    <button
-                      type="button"
-                      onClick={() => setForgotModalOpen(true)}
+                    <Link
+                      href="/forgot-password"
                       className="text-blue-600 hover:text-blue-700 hover:underline font-medium transition-colors"
                     >
-                      Забыли пароль?
-                    </button>
+                      {t("auth.forgotPassword")}
+                    </Link>
                     <span className="hidden sm:inline">•</span>
                     <p>
-                      Нет аккаунта?{" "}
+                      {t("auth.noAccount")}{" "}
                       <Link
                         href="/register"
                         className="text-blue-600 hover:text-blue-700 hover:underline font-medium transition-colors"
                       >
-                        Регистрация
+                        {t("common.register")}
                       </Link>
                     </p>
                   </div>
@@ -184,7 +184,6 @@ export default function LoginPage() {
           />
         </div>
       </main>
-      <ForgotPasswordModal open={isForgotModalOpen} onOpenChange={setForgotModalOpen} />
     </div>
   )
 }

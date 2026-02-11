@@ -9,15 +9,17 @@ import { Label } from "@/components/ui/label";
 import Image from "next/image";
 import logoDark from "@/assets/img/logoDark.svg";
 import logoLight from "@/assets/img/logoLight.svg";
+import { toast } from "sonner";
+import { useTranslation } from "@/i18n";
 
 export default function AdminLoginPage() {
+  const { t } = useTranslation();
   const router = useRouter();
   const login = useAdminStore((state) => state.login);
   const isAuthenticated = useAdminStore((state) => state.isAuthenticated);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   // Agar allaqachon login bo'lsa, dashboard ga yo'naltirish
@@ -38,7 +40,6 @@ export default function AdminLoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
     setIsLoading(true);
 
     // Simulyatsiya qilish
@@ -49,7 +50,7 @@ export default function AdminLoginPage() {
     if (result.success) {
       router.push("/admin");
     } else {
-      setError(result.error);
+      toast.error(result.error);
     }
 
     setIsLoading(false);
@@ -82,17 +83,17 @@ export default function AdminLoginPage() {
         <div className="bg-card border border-border rounded-2xl p-6 md:p-8 shadow-lg">
           <div className="text-center mb-6">
             <h1 className="text-2xl font-semibold text-foreground">
-              Admin Panel
+              {t("admin.adminPanel")}
             </h1>
             <p className="text-muted-foreground mt-1">
-              Tizimga kirish uchun ma'lumotlarni kiriting
+              {t("admin.loginToAdmin")}
             </p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Username */}
             <div className="space-y-2">
-              <Label htmlFor="username">Login</Label>
+              <Label htmlFor="username">{t("admin.loginField")}</Label>
               <Input
                 id="username"
                 type="text"
@@ -107,7 +108,7 @@ export default function AdminLoginPage() {
 
             {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password">Parol</Label>
+              <Label htmlFor="password">{t("admin.passwordField")}</Label>
               <Input
                 id="password"
                 type="password"
@@ -119,13 +120,6 @@ export default function AdminLoginPage() {
                 className="h-11"
               />
             </div>
-
-            {/* Error message */}
-            {error && (
-              <div className="bg-destructive/10 border border-destructive/20 text-destructive text-sm rounded-lg p-3">
-                {error}
-              </div>
-            )}
 
             {/* Submit Button */}
             <Button
@@ -155,10 +149,10 @@ export default function AdminLoginPage() {
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
                     />
                   </svg>
-                  Kirish...
+                  {t("admin.loggingIn")}
                 </span>
               ) : (
-                "Kirish"
+                t("common.login")
               )}
             </Button>
           </form>
@@ -169,14 +163,14 @@ export default function AdminLoginPage() {
               href="/"
               className="text-sm text-muted-foreground hover:text-foreground transition-colors"
             >
-              ← Bosh sahifaga qaytish
+              &larr; {t("admin.backToHome")}
             </a>
           </div>
         </div>
 
         {/* Hint */}
         <p className="text-center text-xs text-muted-foreground mt-4">
-          Default: admin / password
+          {t("admin.defaultCredentials")}
         </p>
       </div>
     </div>

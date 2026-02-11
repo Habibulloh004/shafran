@@ -5,8 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import Image from "next/image";
+import { useTranslation } from "@/i18n";
 
 export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     title: banner?.title || "",
     url: banner?.url || "",
@@ -63,11 +65,11 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Title */}
       <div className="space-y-2">
-        <Label htmlFor="title">Banner nomi</Label>
+        <Label htmlFor="title">{t("admin.bannerName")}</Label>
         <Input
           id="title"
           name="title"
-          placeholder="Masalan: Yangi kolleksiya"
+          placeholder={t("admin.bannerNamePlaceholder")}
           value={formData.title}
           onChange={handleChange}
           required
@@ -76,23 +78,23 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
 
       {/* URL */}
       <div className="space-y-2">
-        <Label htmlFor="url">Havola (URL)</Label>
+        <Label htmlFor="url">{t("admin.bannerUrl")}</Label>
         <Input
           id="url"
           name="url"
           type="url"
-          placeholder="https://example.com/page"
+          placeholder={t("admin.bannerUrlPlaceholder")}
           value={formData.url}
           onChange={handleChange}
         />
         <p className="text-xs text-muted-foreground">
-          Banner bosilganda qaysi sahifaga o'tadi
+          {t("admin.bannerUrlHint")}
         </p>
       </div>
 
       {/* Image Method Selection */}
       <div className="space-y-4">
-        <Label>Rasm qo'shish usuli</Label>
+        <Label>{t("admin.imageMethod")}</Label>
 
         {imageMethod === null && (
           <div className="flex gap-3">
@@ -105,7 +107,7 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
               </svg>
-              <span>URL orqali</span>
+              <span>{t("admin.viaUrl")}</span>
             </Button>
             <Button
               type="button"
@@ -116,7 +118,7 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
-              <span>Rasm yuklash</span>
+              <span>{t("admin.uploadImage")}</span>
             </Button>
           </div>
         )}
@@ -125,19 +127,19 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
         {imageMethod === "url" && (
           <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">URL orqali qo'shish</span>
+              <span className="text-sm font-medium">{t("admin.addViaUrl")}</span>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={resetImageMethod}
               >
-                Bekor qilish
+                {t("common.cancel")}
               </Button>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image_light">Light mode rasmi (URL)</Label>
+              <Label htmlFor="image_light">{t("admin.lightModeImage")}</Label>
               <Input
                 id="image_light"
                 name="image_light"
@@ -149,7 +151,7 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="image_dark">Dark mode rasmi (URL)</Label>
+              <Label htmlFor="image_dark">{t("admin.darkModeImage")}</Label>
               <Input
                 id="image_dark"
                 name="image_dark"
@@ -159,14 +161,14 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
                 onChange={handleChange}
               />
               <p className="text-xs text-muted-foreground">
-                Ixtiyoriy. Agar bo'sh qolsa, light mode rasmi ishlatiladi
+                {t("admin.darkModeOptional")}
               </p>
             </div>
 
             {/* Preview */}
             {formData.image_light && (
               <div className="space-y-2">
-                <Label>Ko'rinishi</Label>
+                <Label>{t("admin.preview")}</Label>
                 <div className="relative aspect-[16/9] rounded-lg overflow-hidden bg-muted">
                   <Image
                     src={formData.image_light}
@@ -184,20 +186,20 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
         {imageMethod === "upload" && (
           <div className="space-y-4 p-4 bg-muted/30 rounded-lg">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-medium">Rasm yuklash</span>
+              <span className="text-sm font-medium">{t("admin.uploadImage")}</span>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={resetImageMethod}
               >
-                Bekor qilish
+                {t("common.cancel")}
               </Button>
             </div>
 
             {/* Light mode upload */}
             <div className="space-y-2">
-              <Label>Light mode rasmi</Label>
+              <Label>{t("admin.lightModeUpload")}</Label>
               <input
                 ref={lightInputRef}
                 type="file"
@@ -220,7 +222,7 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
                     className="absolute bottom-2 right-2"
                     onClick={() => lightInputRef.current?.click()}
                   >
-                    O'zgartirish
+                    {t("admin.change")}
                   </Button>
                 </div>
               ) : (
@@ -232,14 +234,14 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
                   <svg className="w-8 h-8 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  <span className="text-sm text-muted-foreground">Rasm yuklash</span>
+                  <span className="text-sm text-muted-foreground">{t("admin.uploadImage")}</span>
                 </button>
               )}
             </div>
 
             {/* Dark mode upload */}
             <div className="space-y-2">
-              <Label>Dark mode rasmi (ixtiyoriy)</Label>
+              <Label>{t("admin.darkModeUpload")}</Label>
               <input
                 ref={darkInputRef}
                 type="file"
@@ -262,7 +264,7 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
                     className="absolute bottom-2 right-2"
                     onClick={() => darkInputRef.current?.click()}
                   >
-                    O'zgartirish
+                    {t("admin.change")}
                   </Button>
                 </div>
               ) : (
@@ -274,7 +276,7 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
                   <svg className="w-6 h-6 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                   </svg>
-                  <span className="text-xs text-muted-foreground">Dark mode uchun rasm (ixtiyoriy)</span>
+                  <span className="text-xs text-muted-foreground">{t("admin.darkModeUploadHint")}</span>
                 </button>
               )}
             </div>
@@ -291,7 +293,7 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
           disabled={isLoading}
           className="flex-1"
         >
-          Bekor qilish
+          {t("common.cancel")}
         </Button>
         <Button
           type="submit"
@@ -304,12 +306,12 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-              Saqlanmoqda...
+              {t("common.saving")}
             </span>
           ) : banner ? (
-            "Saqlash"
+            t("common.save")
           ) : (
-            "Qo'shish"
+            t("admin.add")
           )}
         </Button>
       </div>

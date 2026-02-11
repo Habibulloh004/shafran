@@ -2,15 +2,11 @@ const SECTION_DEFINITIONS = [
   {
     key: "flowers",
     title: "Цветы",
-    headline: "Shafran Flowers",
-    description: "Авторские букеты и композиции",
     matchers: [/flower/i, /bouquet/i, /цвет/i, /букет/i, /rose/i],
   },
   {
     key: "perfumes",
     title: "Парфюмерия",
-    headline: "Shafran Perfumes",
-    description: "Духи и ароматы для всех",
     matchers: [/perfume/i, /parfum/i, /аромат/i, /дух/i, /парф/i, /fragrance/i],
   },
 ];

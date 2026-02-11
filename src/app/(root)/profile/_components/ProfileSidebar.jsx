@@ -6,31 +6,33 @@ import { useRouter } from 'next/navigation';
 import SidebarItem from './SidebarItem';
 import ExitModal from './ExitModal';
 import { useAuthStore, clearAuthCookie } from '@/store/authStore';
+import { useTranslation } from "@/i18n";
 
 // Menu items configuration
 const MENU_ITEMS = [
-  { id: 'profile', label: 'My Profile', icon: User },
-  { id: 'orders', label: 'Orders', icon: Package },
-  // { id: 'bonus', label: 'Bonus', icon: Gift },
+  { id: 'profile', labelKey: 'profile.myProfile', icon: User },
+  { id: 'orders', labelKey: 'profile.orders', icon: Package },
+  // { id: 'bonus', labelKey: 'profile.bonus', icon: Gift },
   // TODO: Restore address feature when branches & delivery are enabled
-  // { id: 'addresses', label: 'Addresses', icon: MapPin },
+  // { id: 'addresses', labelKey: 'profile.addresses', icon: MapPin },
 ];
 
 export default function ProfileSidebar({ activeTab, profile }) {
   const router = useRouter();
   const [isExitModalOpen, setIsExitModalOpen] = useState(false);
   const clearAuth = useAuthStore((state) => state.clearAuth);
+  const { t } = useTranslation();
 
   const profileName = useMemo(() => {
-    if (!profile) return "Гость";
+    if (!profile) return t("common.guest");
     if (profile.first_name || profile.last_name) {
       return `${profile.first_name || ""} ${profile.last_name || ""}`.trim();
     }
     if (profile.phone_numbers?.length) {
       return profile.phone_numbers[0];
     }
-    return "Гость";
-  }, [profile]);
+    return t("common.guest");
+  }, [profile, t]);
 
   // Handle navigation to different tabs
   const handleTabChange = useCallback((tabId) => {
@@ -58,14 +60,14 @@ export default function ProfileSidebar({ activeTab, profile }) {
   return (
     <>
       <aside className="w-auto lg:w-64 md:p-4">
-        <h1 className='px-3 py-2 max-md:hidden'>Привет {profileName || "Гость"}</h1>
-        
+        <h1 className='px-3 py-2 max-md:hidden'>{t("common.hello")} {profileName || t("common.guest")}</h1>
+
         <nav className="space-y-2">
           {MENU_ITEMS.map((item) => (
             <SidebarItem
               key={item.id}
               icon={item.icon}
-              label={item.label}
+              label={t(item.labelKey)}
               isActive={activeTab === item.id}
               onClick={() => handleTabChange(item.id)}
             />
@@ -74,7 +76,7 @@ export default function ProfileSidebar({ activeTab, profile }) {
           <div className="pt-4 mt-4 border-t border-[#E8EBF1] dark:border-[#E8EBF14D]">
             <SidebarItem
               icon={LogOut}
-              label="Exit"
+              label={t("profile.exit")}
               onClick={handleExit}
               isExit={true}
             />

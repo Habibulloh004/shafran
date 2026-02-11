@@ -145,11 +145,10 @@ export async function revalidatePath(path) {
 // Billz API Server Actions (Backend proxy orqali)
 // ============================================
 
-// Backend URL - hardcoded chunki env variables serverda yuklanmayapti
-const BACKEND_URL = "http://localhost:8080";
+const BACKEND_URL = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8082";
 
 // Backend orqali Billz API ga so'rov yuborish
-async function fetchBillz(endpoint, params = {}) {
+async function fetchBillz(endpoint, params = {}, { revalidate = 600 } = {}) {
   const url = new URL(`${BACKEND_URL}/api/billz${endpoint}`);
 
   // Query parametrlarini qo'shish
@@ -170,7 +169,7 @@ async function fetchBillz(endpoint, params = {}) {
     headers: {
       "Content-Type": "application/json",
     },
-    cache: "no-store",
+    next: { revalidate },
   });
 
   if (!response.ok) {
@@ -189,7 +188,7 @@ export async function getBillzBrands(params = {}) {
       page: 1,
       limit: 100,
       ...params,
-    });
+    }, { revalidate: 3600 });
     return data?.data || data?.brands || [];
   } catch (error) {
     console.error("getBillzBrands error:", error);
@@ -205,7 +204,7 @@ export async function getBillzCategories(params = {}) {
       limit: 100,
       is_deleted: false,
       ...params,
-    });
+    }, { revalidate: 1800 });
     return data?.data || data?.categories || [];
   } catch (error) {
     console.error("getBillzCategories error:", error);
@@ -246,17 +245,132 @@ export async function getBillzCategory(categoryId) {
   }
 }
 
+// Kategoriya daraxtidan berilgan ID va uning barcha bolalar (descendant) ID larini yig'ish
+function collectCategoryIds(categories, targetId) {
+  const ids = new Set();
+
+  // Rekursiv: targetId ni topib, uning barcha descendantlarini yig'ish
+  const collectDescendants = (cats) => {
+    for (const cat of cats) {
+      ids.add(String(cat.id));
+      const children = cat.subRows || cat.children || [];
+      if (children.length > 0) {
+        collectDescendants(children);
+      }
+    }
+  };
+
+  // Daraxtdan targetId ni topish
+  const findAndCollect = (cats) => {
+    for (const cat of cats) {
+      if (String(cat.id) === String(targetId)) {
+        // Topildi — o'zini va barcha bolalarini qo'shish
+        ids.add(String(cat.id));
+        const children = cat.subRows || cat.children || [];
+        if (children.length > 0) {
+          collectDescendants(children);
+        }
+        return true;
+      }
+      const children = cat.subRows || cat.children || [];
+      if (children.length > 0) {
+        if (findAndCollect(children)) return true;
+      }
+    }
+    return false;
+  };
+
+  findAndCollect(categories);
+
+  // Agar hech narsa topilmasa, faqat targetId ni qo'shish
+  if (ids.size === 0) {
+    ids.add(String(targetId));
+  }
+
+  return ids;
+}
+
+// Berilgan categoryId ning barcha ancestor (ota-ona) IDlarini yig'ish
+function collectAncestorIds(categories, targetId) {
+  const ancestors = [];
+
+  const findPath = (cats, path) => {
+    for (const cat of cats) {
+      const currentPath = [...path, String(cat.id)];
+      if (String(cat.id) === String(targetId)) {
+        ancestors.push(...path); // targetId dan oldingi barcha IDlar
+        return true;
+      }
+      const children = cat.subRows || cat.children || [];
+      if (children.length > 0) {
+        if (findPath(children, currentPath)) return true;
+      }
+    }
+    return false;
+  };
+
+  findPath(categories, []);
+  return new Set(ancestors);
+}
+
 // Productlarni olish (filter bilan)
 export async function getBillzProducts(params = {}) {
   try {
+    // category_id ni ajratib olish (Billz API buni qo'llab-quvvatlamaydi)
+    const { category_id, ...billzParams } = params;
+
+    // Barcha productlarni olish
     const data = await fetchBillz("/v2/products", {
       page: 1,
-      limit: 24,
-      ...params,
-    });
+      limit: 200,
+      ...billzParams,
+    }, { revalidate: 600 });
+
+    let products = data?.data || data?.products || [];
+
+    // Agar category_id berilgan bo'lsa, client-side filter qilish
+    if (category_id && products.length > 0) {
+      try {
+        const allCategories = await getBillzCategories({ limit: 100 });
+
+        // Tanlangan kategoriya va uning barcha bolalari IDlari
+        const matchIds = collectCategoryIds(allCategories, category_id);
+        // Tanlangan kategoriyaning ota-onalari IDlari
+        const ancestorIds = collectAncestorIds(allCategories, category_id);
+
+        products = products.filter((product) => {
+          const productCatIds = (product.categories || []).map((c) => String(c.id));
+          if (productCatIds.length === 0) return false;
+
+          // Product kategoriyasi tanlangan kategoriya yoki uning bolasi bo'lsa — mos
+          if (productCatIds.some((id) => matchIds.has(id))) return true;
+
+          // Product kategoriyasi tanlangan kategoriyaning ota-onasi bo'lsa — mos
+          // (masalan, product "Parfyumeriya"ga biriktirilgan, lekin user "Erkak atir"ni tanlagan)
+          if (productCatIds.some((id) => ancestorIds.has(id))) return true;
+
+          return false;
+        });
+      } catch (filterError) {
+        console.error("Category filter error, returning all products:", filterError);
+      }
+    }
+
+    // Client-side pagination
+    const page = Number(params.page) || 1;
+    const limit = Number(params.limit) || 24;
+    const total = products.length;
+    const offset = (page - 1) * limit;
+    const paginatedProducts = products.slice(offset, offset + limit);
+
     return {
-      data: data?.data || data?.products || [],
-      pagination: data?.pagination || data?.meta || null,
+      data: paginatedProducts,
+      pagination: {
+        current_page: page,
+        items_per_page: limit,
+        total_items: total,
+        total_pages: Math.ceil(total / limit),
+      },
     };
   } catch (error) {
     console.error("getBillzProducts error:", error);
@@ -271,7 +385,7 @@ export async function getBillzProduct(productId) {
     const data = await fetchBillz("/v2/products", {
       page: 1,
       limit: 100,
-    });
+    }, { revalidate: 600 });
 
     const products = data?.products || data?.data || [];
     const product = products.find(p => String(p.id) === String(productId));

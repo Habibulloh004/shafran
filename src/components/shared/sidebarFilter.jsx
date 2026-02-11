@@ -10,6 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import { useCallback, useEffect, useState } from "react";
+import { useTranslation } from "@/i18n";
 
 const FALLBACK_PRICE = { min: 0, max: 50000000, step: 500000 };
 
@@ -21,6 +22,7 @@ export default function SidebarFilter({
   onParameterToggle,
   onClear,
 }) {
+  const { t } = useTranslation();
   const priceFilter = filters.price || FALLBACK_PRICE;
   const [price, setPrice] = useState([
     selectedFilters.price?.[0] ?? priceFilter.min ?? FALLBACK_PRICE.min,
@@ -63,16 +65,16 @@ export default function SidebarFilter({
       >
         <AccordionItem value="price">
           <AccordionTrigger className="hover:no-underline">
-            Цена
+            {t("common.price")}
           </AccordionTrigger>
           <AccordionContent>
             <div className="flex items-center justify-between gap-2 mb-2">
               <span className="w-full px-2 py-1 border rounded-md text-sm text-center">
-                {price[0].toLocaleString()} сум
+                {price[0].toLocaleString()} {t("common.sum")}
               </span>
               <span className="text-sm shrink-0">—</span>
               <span className="w-full px-2 py-1 border rounded-md text-sm text-center">
-                {price[1].toLocaleString()} сум
+                {price[1].toLocaleString()} {t("common.sum")}
               </span>
             </div>
             <Slider
@@ -88,12 +90,12 @@ export default function SidebarFilter({
 
         <AccordionItem value="brands">
           <AccordionTrigger className="hover:no-underline">
-            Бренды
+            {t("common.brands")}
           </AccordionTrigger>
           <AccordionContent>
             <div className="flex flex-col gap-2 max-h-48 overflow-y-auto custom-scroll">
               {brandOptions.length === 0 && (
-                <p className="text-xs text-muted-foreground">Нет брендов</p>
+                <p className="text-xs text-muted-foreground">{t("common.noBrands")}</p>
               )}
               {brandOptions.map((brand) => (
                 <Label
@@ -120,7 +122,7 @@ export default function SidebarFilter({
               <div className="flex flex-col gap-2 max-h-48 overflow-y-auto custom-scroll">
                 {group.values.length === 0 && (
                   <p className="text-xs text-muted-foreground">
-                    Нет значений
+                    {t("common.noValues")}
                   </p>
                 )}
                 {group.values.map((value) => (
@@ -147,7 +149,7 @@ export default function SidebarFilter({
             onClick={() => onClear?.()}
             className="w-full px-3 py-2 text-sm bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-md transition-colors"
           >
-            Очистить фильтры
+            {t("common.clearFilters")}
           </button>
         </div>
       </Accordion>

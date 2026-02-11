@@ -1,0 +1,19 @@
+{
+  "cart": "Корзина",
+  "cartEmpty": "Корзина пуста",
+  "yourCartEmpty": "Ваша корзина пуста",
+  "totalAmount": "Общая сумма",
+  "placeOrder": "Оформить заказ",
+  "placingOrder": "Отправляем...",
+  "orderConfirmation": "Подтверждение заказа",
+  "orderAccepted": "Заказ успешно принят.",
+  "managersWillContact": "Наши менеджеры свяжутся с вами в ближайшее время",
+  "authRequired": "Требуется авторизация",
+  "authRequiredDescription": "Для оформления заказа необходимо войти в аккаунт.",
+  "orderError": "Ошибка оформления заказа",
+  "orderFailed": "Не удалось оформить заказ.",
+  "paymentMethod": "Способ оплаты",
+  "cash": "Наличными",
+  "clearAll": "Очистить",
+  "checkout": "Оформить"
+}

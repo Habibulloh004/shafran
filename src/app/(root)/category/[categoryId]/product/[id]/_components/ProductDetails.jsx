@@ -1,22 +1,27 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
 import { Price } from "@/lib/functions";
 import Image from "next/image";
 import ImageGallery from "./ImageGallery";
 import { collectGalleryItems, resolveHeroImage } from "@/lib/media";
 import AddToCartButton from "./AddToCartButton";
-
-const genderLabel = (gender) => {
-  if (gender === "female") return "Женский";
-  if (gender === "male") return "Мужской";
-  if (gender === "unisex" || gender === "uni") return "Унисекс";
-  return gender || "";
-};
+import { useTranslation } from "@/i18n";
 
 export default function ProductDetails({
   product,
   heroImageOverride,
   galleryOverride,
 }) {
+  const { t } = useTranslation();
+
+  const genderLabel = (gender) => {
+    if (gender === "female") return t("common.female");
+    if (gender === "male") return t("common.male");
+    if (gender === "unisex" || gender === "uni") return t("common.unisex");
+    return gender || "";
+  };
+
   const primaryVariant = product?.variants?.[0];
   const gallery = galleryOverride ?? collectGalleryItems(product);
   const heroImage = heroImageOverride ?? resolveHeroImage(product, gallery);
@@ -42,24 +47,24 @@ export default function ProductDetails({
 
   const infoRows = [
     {
-      label: "Тестер",
+      label: t("common.tester"),
       value:
         typeof product?.is_tester_available === "boolean"
           ? product.is_tester_available
-            ? "Да"
-            : "Нет"
+            ? t("common.yes")
+            : t("common.no")
           : null,
     },
-    { label: "Производитель", value: product?.manufacturer },
-    { label: "Бренд", value: product?.brand?.name },
-    { label: "Семейство", value: product?.fragrance_family },
-    { label: "Группа ароматов", value: product?.fragrance_group },
+    { label: t("common.manufacturer"), value: product?.manufacturer },
+    { label: t("common.brand"), value: product?.brand?.name },
+    { label: t("common.fragranceFamily"), value: product?.fragrance_family },
+    { label: t("common.fragranceGroup"), value: product?.fragrance_group },
     {
-      label: "Пол",
+      label: t("common.gender"),
       value: genderLabel(product?.gender_audience || product?.category?.gender),
     },
-    { label: "Состав", value: product?.composition_notes },
-    { label: "Страна производства", value: product?.country_of_origin },
+    { label: t("common.composition"), value: product?.composition_notes },
+    { label: t("common.countryOfOrigin"), value: product?.country_of_origin },
   ].filter((item) => item.value);
 
   return (
@@ -80,13 +85,13 @@ export default function ProductDetails({
             type="button"
             className="rounded-xl h-10 md:h-12 w-full sm:w-40 md:w-48 bg-white text-primary hover:text-primary hover:bg-white/70 cursor-pointer dark:bg-primary dark:text-white dark:hover:bg-primary/70"
           >
-            Купить в 1 клик
+            {t("common.buyOneClick")}
           </Button>
           <Button
             type="button"
             className="rounded-xl h-10 md:h-12 w-full sm:w-40 md:w-48 bg-white text-primary hover:text-primary hover:bg-white/70 cursor-pointer dark:bg-primary dark:text-white dark:hover:bg-primary/70"
           >
-            Распив
+            {t("common.decant")}
           </Button>
         </div>
       </div>
@@ -94,7 +99,7 @@ export default function ProductDetails({
       <div className="w-full md:w-11/12 xl:w-10/12 mx-auto flex flex-col md:flex-row md:items-end md:justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-3xl font-bold">
-            {product?.name || product?.slug || "Без названия"}
+            {product?.name || product?.slug || t("common.noName")}
           </h1>
           {primaryVariant?.label && (
             <span className="text-primary text-xs md:text-sm mt-1 inline-block">
@@ -150,13 +155,13 @@ export default function ProductDetails({
             type="button"
             className="w-48 bg-white text-primary hover:text-primary hover:bg-white/70 cursor-pointer dark:bg-primary dark:text-white dark:hover:bg-primary/70"
           >
-            Купить в 1 клик
+            {t("common.buyOneClick")}
           </Button>
           <Button
             type="button"
             className="w-48 bg-white text-primary hover:text-primary hover:bg-white/70 cursor-pointer dark:bg-primary dark:text-white dark:hover:bg-primary/70"
           >
-            Распив
+            {t("common.decant")}
           </Button>
         </div>
       </div>

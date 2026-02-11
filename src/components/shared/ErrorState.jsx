@@ -5,8 +5,10 @@ import Link from "next/link";
 import { Home, RefreshCw } from "lucide-react";
 import CustomBackground from "./customBackground";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/i18n";
 
 export default function ErrorState({ onRetry, showDetails = false, error }) {
+  const { t } = useTranslation();
   return (
     <CustomBackground
       singleImage={male}
@@ -20,14 +22,14 @@ export default function ErrorState({ onRetry, showDetails = false, error }) {
     >
       <div className="w-full max-w-lg text-center bg-white/80 backdrop-blur rounded-2xl border shadow p-8">
         <span className="inline-flex items-center gap-2 rounded-full border bg-white px-3 py-1 text-xs text-gray-600">
-          ⚠️ Ошибка
+          {t("errors.errorLabel")}
         </span>
 
         <h1 className="mt-4 text-2xl font-semibold text-gray-900">
-          Что-то пошло не так
+          {t("errors.somethingWentWrong")}
         </h1>
         <p className="mt-2 text-sm text-gray-600">
-          Произошла непредвиденная ошибка. Пожалуйста, попробуйте снова.
+          {t("errors.unexpectedError")}
         </p>
 
         {showDetails && (
@@ -43,7 +45,7 @@ export default function ErrorState({ onRetry, showDetails = false, error }) {
               className="inline-flex items-center gap-2 rounded-xl bg-gray-900 px-4 py-2 text-sm text-white hover:bg-black"
             >
               <RefreshCw className="h-4 w-4" />
-              Повторить
+              {t("common.retry")}
             </button>
           )}
 
@@ -52,7 +54,7 @@ export default function ErrorState({ onRetry, showDetails = false, error }) {
             className="inline-flex items-center gap-2 rounded-xl border px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
           >
             <Home className="h-4 w-4" />
-            На главную
+            {t("common.home")}
           </Link>
         </div>
       </div>

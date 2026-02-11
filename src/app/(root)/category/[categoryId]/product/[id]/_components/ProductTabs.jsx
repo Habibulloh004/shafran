@@ -16,15 +16,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useMemo } from "react";
-
-const genderLabel = (gender) => {
-  if (gender === "female") return "Женский";
-  if (gender === "male") return "Мужской";
-  if (gender === "unisex" || gender === "uni") return "Унисекс";
-  return gender || "";
-};
+import { useTranslation } from "@/i18n";
 
 export default function ProductTabs({ product }) {
+  const { t } = useTranslation();
+
+  const genderLabel = (gender) => {
+    if (gender === "female") return t("common.female");
+    if (gender === "male") return t("common.male");
+    if (gender === "unisex" || gender === "uni") return t("common.unisex");
+    return gender || "";
+  };
+
   const descriptionBlocks = useMemo(() => {
     if (Array.isArray(product?.description_blocks) && product.description_blocks.length) {
       return [...product.description_blocks]
@@ -45,7 +48,6 @@ export default function ProductTabs({ product }) {
   }, [product]);
 
   const specRows = useMemo(() => {
-    // 1. specifications massividan (agar mavjud bo'lsa)
     if (Array.isArray(product?.specifications) && product.specifications.length) {
       return [...product.specifications]
         .sort((a, b) => (a.display_order ?? 0) - (b.display_order ?? 0))
@@ -56,7 +58,6 @@ export default function ProductTabs({ product }) {
         .filter((row) => row.value);
     }
 
-    // 2. product_attributes massividan (API format - doc/product_info.md ga qarab)
     if (Array.isArray(product?.product_attributes) && product.product_attributes.length) {
       return product.product_attributes.map((attr) => ({
         label: attr.attribute_name,
@@ -64,7 +65,6 @@ export default function ProductTabs({ product }) {
       })).filter((row) => row.value);
     }
 
-    // 3. custom_fields massividan
     if (Array.isArray(product?.custom_fields) && product.custom_fields.length) {
       return product.custom_fields.map((field) => ({
         label: field.custom_field_name || field.cusom_field_name,
@@ -72,36 +72,35 @@ export default function ProductTabs({ product }) {
       })).filter((row) => row.value);
     }
 
-    // 4. Fallback - mavjud maydonlardan xarakteristikalar
     const fallback = [
-      { label: "Бренд", value: product?.brand?.name || product?.brand_name },
+      { label: t("common.brand"), value: product?.brand?.name || product?.brand_name },
       {
-        label: "Тип",
+        label: t("common.type"),
         value: product?.product_types
           ?.map((type) => type.name)
           .filter(Boolean)
           .join(", "),
       },
-      { label: "Год выпуска", value: product?.release_year },
+      { label: t("common.releaseYear"), value: product?.release_year },
       {
-        label: "Пол",
+        label: t("common.gender"),
         value: genderLabel(
           product?.gender_audience || product?.category?.gender_audience
         ),
       },
       {
-        label: "Страна",
+        label: t("common.country"),
         value: product?.country_of_origin || product?.brand?.country,
       },
       {
-        label: "Ноты",
+        label: t("common.notes"),
         value: product?.fragrance_notes
           ?.map((note) => note.name)
           .filter(Boolean)
           .join(", "),
       },
       {
-        label: "Сезоны",
+        label: t("common.seasons"),
         value: product?.seasons
           ?.map((season) => season.name)
           .filter(Boolean)
@@ -110,7 +109,7 @@ export default function ProductTabs({ product }) {
     ].filter((row) => row.value);
 
     return fallback;
-  }, [product]);
+  }, [product, t]);
 
   const variants = Array.isArray(product?.variants) ? product.variants : [];
 
@@ -122,13 +121,13 @@ export default function ProductTabs({ product }) {
             value="params"
             className="data-[state=active]:bg-transparent  data-[state=active]:text-black text-primary  data-[state=active]:font-bold shadow-none  data-[state=active]:shadow-none dark:data-[state=active]:border-none dark:data-[state=active]:bg-transparent"
           >
-            ПАРАМЕТРЫ
+            {t("common.parameters")}
           </TabsTrigger>
           <TabsTrigger
             value="description"
             className="data-[state=active]:bg-transparent  data-[state=active]:text-black text-primary  data-[state=active]:font-bold shadow-none  data-[state=active]:shadow-none dark:data-[state=active]:border-none dark:data-[state=active]:bg-transparent"
           >
-            ОПИСАНИЕ
+            {t("common.description")}
           </TabsTrigger>
         </TabsList>
 
@@ -137,8 +136,8 @@ export default function ProductTabs({ product }) {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-1/3">Характеристика</TableHead>
-                  <TableHead>Значение</TableHead>
+                  <TableHead className="w-1/3">{t("common.characteristic")}</TableHead>
+                  <TableHead>{t("common.value")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -152,7 +151,7 @@ export default function ProductTabs({ product }) {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={2} className="text-center">
-                      Характеристики будут добавлены позже.
+                      {t("common.specsComingSoon")}
                     </TableCell>
                   </TableRow>
                 )}
@@ -165,10 +164,10 @@ export default function ProductTabs({ product }) {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Вариант</TableHead>
-                    <TableHead>Объем</TableHead>
-                    <TableHead>Цена</TableHead>
-                    <TableHead>Наличие</TableHead>
+                    <TableHead>{t("common.variant")}</TableHead>
+                    <TableHead>{t("common.volume")}</TableHead>
+                    <TableHead>{t("common.price")}</TableHead>
+                    <TableHead>{t("common.availability")}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -178,7 +177,7 @@ export default function ProductTabs({ product }) {
                         {variant.label || variant.sku}
                       </TableCell>
                       <TableCell>
-                        {variant.volume_ml ? `${variant.volume_ml} мл` : "-"}
+                        {variant.volume_ml ? `${variant.volume_ml} ${t("common.ml")}` : "-"}
                       </TableCell>
                       <TableCell>
                         {variant.price
@@ -187,8 +186,8 @@ export default function ProductTabs({ product }) {
                       </TableCell>
                       <TableCell>
                         {variant.is_active
-                          ? `На складе: ${variant.inventory_quantity ?? 0}`
-                          : "Недоступно"}
+                          ? `${t("common.inStock")}: ${variant.inventory_quantity ?? 0}`
+                          : t("common.unavailable")}
                       </TableCell>
                     </TableRow>
                   ))}
@@ -208,7 +207,7 @@ export default function ProductTabs({ product }) {
             ))
           ) : (
             <p className="text-muted-foreground">
-              Подробное описание появится позднее.
+              {t("common.descriptionComingSoon")}
             </p>
           )}
         </TabsContent>

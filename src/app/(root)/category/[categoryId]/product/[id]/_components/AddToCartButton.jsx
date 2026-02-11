@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useOrderStore } from "@/store/orderStore";
+import { useTranslation } from "@/i18n";
 
 export default function AddToCartButton({
   product,
@@ -12,6 +13,7 @@ export default function AddToCartButton({
 }) {
   const [isAdding, setIsAdding] = useState(false);
   const addItem = useOrderStore((state) => state.addItem);
+  const { t } = useTranslation();
 
   const handleClick = () => {
     if (!product || isAdding) return;
@@ -22,7 +24,7 @@ export default function AddToCartButton({
 
   const renderContent = () => {
     if (!children) {
-      return isAdding ? "Добавлено" : "В корзину";
+      return isAdding ? t("common.added") : t("common.addToCart");
     }
 
     if (typeof children === "function") {
