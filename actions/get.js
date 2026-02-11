@@ -4,7 +4,13 @@ import { headers } from "next/headers";
 
 const backUrl = process.env.BASE_URL || process.env.BACKEND_URL || "http://localhost:8080";
 
-export async function getData({ endpoint, tag, revalidate }) {
+export async function getData({
+  endpoint,
+  tag,
+  revalidate,
+  throwOnError = true,
+  ignoreStatuses = [],
+}) {
   try {
     // Cache options obyektini yaratish
     const cacheOptions = {};
@@ -37,6 +43,14 @@ export async function getData({ endpoint, tag, revalidate }) {
     });
 
     if (!response.ok) {
+      if (ignoreStatuses.includes(response.status)) {
+        return null;
+      }
+
+      if (!throwOnError) {
+        return null;
+      }
+
       throw new Error(`HTTP error! status: ${response.status}`);
     }
 
@@ -44,7 +58,11 @@ export async function getData({ endpoint, tag, revalidate }) {
     return data;
   } catch (error) {
     console.error("Failed to fetch data:", error);
-    throw error;
+    if (throwOnError) {
+      throw error;
+    }
+
+    return null;
   }
 }
 

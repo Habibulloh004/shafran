@@ -19,6 +19,8 @@ export default function Footer() {
           endpoint: "/api/footer",
           tag: "footer",
           revalidate: 0,
+          throwOnError: false,
+          ignoreStatuses: [401, 403, 404],
         })
         setSettings(data?.data || data || null)
       } catch (error) {

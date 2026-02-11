@@ -27,6 +27,7 @@ const CustomBackground = ({
           fill
           priority={priority}
           quality={quality}
+          
           placeholder="blur"
           className={cn("absolute inset-0 object-cover", classNameImage)}
           sizes="100vw"
@@ -47,6 +48,7 @@ const CustomBackground = ({
         fill
         priority={priority}
         quality={quality}
+        
         placeholder="blur"
         className={cn("absolute inset-0 object-cover hidden dark:block", classNameImage)}
         sizes="100vw"
@@ -59,6 +61,7 @@ const CustomBackground = ({
         fill
         priority={priority}
         quality={quality}
+        
         placeholder="blur"
         className={cn("absolute inset-0 object-cover block dark:hidden", classNameImage)}
         sizes="100vw"

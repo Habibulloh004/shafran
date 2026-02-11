@@ -149,13 +149,6 @@ export default function LoginPage() {
 
                   {/* Links */}
                   <div className="flex flex-col sm:flex-row gap-2 text-sm sm:text-base text-center text-gray-600">
-                    <Link
-                      href="/forgot-password"
-                      className="text-blue-600 hover:text-blue-700 hover:underline font-medium transition-colors"
-                    >
-                      {t("auth.forgotPassword")}
-                    </Link>
-                    <span className="hidden sm:inline">•</span>
                     <p>
                       {t("auth.noAccount")}{" "}
                       <Link

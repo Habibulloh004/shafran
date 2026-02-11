@@ -1,4 +1,4 @@
-const CACHE_NAME = "shafran-v1";
+const CACHE_NAME = "shafran-v2";
 
 const PRECACHE_URLS = ["/", "/icons/icon-192x192.png", "/icons/icon-512x512.png"];
 
@@ -31,6 +31,8 @@ self.addEventListener("fetch", (event) => {
 
   // Skip API and backend calls — always go to network
   if (url.pathname.startsWith("/api/")) return;
+  // Skip Next.js internal assets/chunks to avoid stale UI in app updates
+  if (url.pathname.startsWith("/_next/")) return;
 
   // Network-first for navigation (HTML pages)
   if (request.mode === "navigate") {
@@ -40,18 +42,19 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Cache-first for static assets (images, fonts, CSS, JS)
+  // Cache-first only for long-lived public assets.
   if (
     url.pathname.startsWith("/icons/") ||
     url.pathname.startsWith("/img/") ||
     url.pathname.startsWith("/background/") ||
-    url.pathname.match(/\.(css|js|woff2?|ttf|eot|svg|png|jpg|jpeg|webp|ico)$/)
+    url.pathname.match(/\.(woff2?|ttf|eot|svg|png|jpg|jpeg|webp|ico)$/)
   ) {
     event.respondWith(
       caches.match(request).then(
         (cached) =>
           cached ||
           fetch(request).then((response) => {
+            if (!response || !response.ok) return response;
             const clone = response.clone();
             caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
             return response;
