@@ -20,6 +20,15 @@ import { toast } from "sonner";
 import { useTranslation } from "@/i18n";
 
 const FALLBACK_IMAGE = "/background/creed.webp";
+const backendUrl =
+  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8082";
+
+function getBannerImage(banner) {
+  const path = banner.image_uz || banner.image_ru || banner.image_en;
+  if (!path) return FALLBACK_IMAGE;
+  if (path.startsWith("http") || path.startsWith("data:")) return path;
+  return `${backendUrl}${path}`;
+}
 
 export default function BannersPage() {
   const { t } = useTranslation();
@@ -157,11 +166,7 @@ export default function BannersPage() {
               {/* Image */}
               <div className="relative aspect-[16/9] bg-muted">
                 <Image
-                  src={
-                    banner.image_light ||
-                    banner.image_dark ||
-                    FALLBACK_IMAGE
-                  }
+                  src={getBannerImage(banner)}
                   alt={banner.title || "Banner"}
                   fill
                   className="object-cover"

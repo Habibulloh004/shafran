@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import BannerForm from "@/components/admin/BannerForm";
-import { postData } from "../../../../../actions/post";
 import { toast } from "sonner";
 import { useTranslation } from "@/i18n";
+
+const backendUrl =
+  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8082";
 
 export default function NewBannerPage() {
   const { t } = useTranslation();
@@ -18,22 +20,22 @@ export default function NewBannerPage() {
     setIsSubmitting(true);
 
     try {
-      const result = await postData({
-        endpoint: "/api/banner/",
-        data: formData,
-        revalidateTags: ["banners"],
-        revalidatePaths: ["/", "/admin/banners"],
+      const res = await fetch(`${backendUrl}/api/banner/`, {
+        method: "POST",
+        body: formData,
       });
 
-      if (result.success) {
-        toast.success(t("admin.bannerAdded"));
-        setTimeout(() => router.push("/admin/banners"), 1500);
-      } else {
-        toast.error(t("admin.bannerAddError") + " " + result.error);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || `HTTP ${res.status}`);
       }
+
+      toast.success(t("admin.bannerAdded"));
+      router.refresh();
+      setTimeout(() => router.push("/admin/banners"), 1500);
     } catch (error) {
       console.error(t("admin.bannerAddError"), error);
-      toast.error(t("errors.networkError"));
+      toast.error(t("admin.bannerAddError") + " " + error.message);
     } finally {
       setIsSubmitting(false);
     }

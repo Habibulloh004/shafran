@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useTheme } from "next-themes";
+import { useTranslation } from "@/i18n";
 import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
@@ -13,11 +13,28 @@ import {
 } from "@/components/ui/carousel";
 
 const FALLBACK_IMAGE = "/background/creed.webp";
+const backendUrl =
+  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8082";
+
+function getImageUrl(path) {
+  if (!path) return null;
+  if (path.startsWith("http") || path.startsWith("data:")) return path;
+  return `${backendUrl}${path}`;
+}
+
+function getImageForLocale(banner, locale) {
+  const imageMap = {
+    uz: banner?.image_uz,
+    ru: banner?.image_ru,
+    en: banner?.image_en,
+  };
+  const raw = imageMap[locale] || banner?.image_uz;
+  return getImageUrl(raw) || FALLBACK_IMAGE;
+}
 
 export default function BannerCarousel({ banners = [] }) {
-  const { resolvedTheme } = useTheme();
+  const { locale } = useTranslation();
   const [mounted, setMounted] = useState(false);
-  const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
     setMounted(true);
@@ -43,10 +60,8 @@ export default function BannerCarousel({ banners = [] }) {
   if (banners.length === 1) {
     const banner = banners[0];
     const image = mounted
-      ? isDark
-        ? banner?.image_dark || banner?.image_light || FALLBACK_IMAGE
-        : banner?.image_light || banner?.image_dark || FALLBACK_IMAGE
-      : banner?.image_light || banner?.image_dark || FALLBACK_IMAGE;
+      ? getImageForLocale(banner, locale)
+      : getImageUrl(banner?.image_uz) || FALLBACK_IMAGE;
 
     return (
       <div className="relative w-full h-20 md:h-42 rounded-2xl overflow-hidden">
@@ -93,10 +108,8 @@ export default function BannerCarousel({ banners = [] }) {
       <CarouselContent gap={4}>
         {banners.map((banner, index) => {
           const image = mounted
-            ? isDark
-              ? banner?.image_dark || banner?.image_light || FALLBACK_IMAGE
-              : banner?.image_light || banner?.image_dark || FALLBACK_IMAGE
-            : banner?.image_light || banner?.image_dark || FALLBACK_IMAGE;
+            ? getImageForLocale(banner, locale)
+            : getImageUrl(banner?.image_uz) || FALLBACK_IMAGE;
 
           return (
             <CarouselItem key={banner.id || index} gap={4}>
