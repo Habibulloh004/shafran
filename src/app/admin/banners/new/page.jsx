@@ -8,9 +8,6 @@ import BannerForm from "@/components/admin/BannerForm";
 import { toast } from "sonner";
 import { useTranslation } from "@/i18n";
 
-const backendUrl =
-  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8082";
-
 export default function NewBannerPage() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -20,7 +17,7 @@ export default function NewBannerPage() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`${backendUrl}/api/banner/`, {
+      const res = await fetch("/api/admin/banners", {
         method: "POST",
         body: formData,
       });

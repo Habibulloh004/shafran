@@ -339,6 +339,80 @@ export async function putData({
   }
 }
 
+// Universal FormData POST action (file upload uchun)
+export async function postFormData({
+  endpoint,
+  formData,
+  revalidateTags,
+  revalidatePaths,
+}) {
+  try {
+    const response = await fetch(`${backUrl}${endpoint}`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (revalidateTags) {
+      const tags = Array.isArray(revalidateTags) ? revalidateTags : [revalidateTags];
+      tags.forEach(t => revalidateTag(t));
+    }
+
+    if (revalidatePaths) {
+      const paths = Array.isArray(revalidatePaths) ? revalidatePaths : [revalidatePaths];
+      paths.forEach(p => revalidatePath(p));
+    }
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("Failed to post form data:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+// Universal FormData PUT action (file upload bilan update uchun)
+export async function putFormData({
+  endpoint,
+  formData,
+  revalidateTags,
+  revalidatePaths,
+}) {
+  try {
+    const response = await fetch(`${backUrl}${endpoint}`, {
+      method: "PUT",
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+    }
+
+    const result = await response.json();
+
+    if (revalidateTags) {
+      const tags = Array.isArray(revalidateTags) ? revalidateTags : [revalidateTags];
+      tags.forEach(t => revalidateTag(t));
+    }
+
+    if (revalidatePaths) {
+      const paths = Array.isArray(revalidatePaths) ? revalidatePaths : [revalidatePaths];
+      paths.forEach(p => revalidatePath(p));
+    }
+
+    return { success: true, data: result };
+  } catch (error) {
+    console.error("Failed to put form data:", error);
+    return { success: false, error: error.message };
+  }
+}
+
 // Universal DELETE action
 export async function deleteData({
   endpoint,

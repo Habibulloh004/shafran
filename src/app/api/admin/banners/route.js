@@ -1,47 +1,31 @@
 import { NextResponse } from "next/server";
 
-// Bu yerda haqiqiy database bilan ishlash kerak
-// Hozircha in-memory storage ishlatamiz (demo uchun)
-let banners = [];
+const backendUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8082";
 
-// GET - Barcha bannerlarni olish
-export async function GET() {
-  try {
-    return NextResponse.json({
-      success: true,
-      data: banners,
-    });
-  } catch (error) {
-    return NextResponse.json(
-      { success: false, error: "Bannerlarni olishda xatolik" },
-      { status: 500 }
-    );
-  }
-}
-
-// POST - Yangi banner yaratish
+// POST - Yangi banner yaratish (backendga FormData proxy)
 export async function POST(request) {
   try {
-    const body = await request.json();
+    const formData = await request.formData();
 
-    const newBanner = {
-      id: Date.now().toString(),
-      title: body.title || "",
-      url: body.url || "",
-      image_light: body.image_light || "",
-      image_dark: body.image_dark || "",
-      created_at: new Date().toISOString(),
-    };
-
-    banners.push(newBanner);
-
-    return NextResponse.json({
-      success: true,
-      data: newBanner,
+    const response = await fetch(`${backendUrl}/api/banner/`, {
+      method: "POST",
+      body: formData,
     });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { success: false, error: data.error || `HTTP ${response.status}` },
+        { status: response.status }
+      );
+    }
+
+    return NextResponse.json(data);
   } catch (error) {
+    console.error("Banner create proxy error:", error);
     return NextResponse.json(
-      { success: false, error: "Banner yaratishda xatolik" },
+      { success: false, error: error.message },
       { status: 500 }
     );
   }

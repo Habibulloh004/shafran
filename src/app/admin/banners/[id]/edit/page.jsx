@@ -9,9 +9,6 @@ import { getData } from "../../../../../../actions/get";
 import { toast } from "sonner";
 import { useTranslation } from "@/i18n";
 
-const backendUrl =
-  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8082";
-
 export default function EditBannerPage() {
   const { t } = useTranslation();
   const router = useRouter();
@@ -51,7 +48,7 @@ export default function EditBannerPage() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`${backendUrl}/api/banner/${bannerId}`, {
+      const res = await fetch(`/api/admin/banners/${bannerId}`, {
         method: "PUT",
         body: formData,
       });
