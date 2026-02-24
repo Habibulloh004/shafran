@@ -53,6 +53,7 @@ export default function RootLayout({ children }) {
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
       <body
+        suppressHydrationWarning
         className={`${geistSans.variable} ${geistMono.variable} ${montserratAlt.variable} ${montserrat?.variable} antialiased`}
       >
         <ThemeProvider

@@ -58,6 +58,7 @@ const CustomRadioItem = React.memo(
                   width={80}
                   height={28}
                   className="mr-2 object-contain rounded-md"
+                  style={{ width: "auto", height: "auto" }}
                 />
               ) : Icon ? (
                 <Icon

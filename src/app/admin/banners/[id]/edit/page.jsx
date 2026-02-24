@@ -5,9 +5,9 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import BannerForm from "@/components/admin/BannerForm";
-import { getData } from "../../../../../../actions/get";
 import { toast } from "sonner";
 import { useTranslation } from "@/i18n";
+import { fetchBannerByIdAction, updateBannerAction } from "../../actions";
 
 export default function EditBannerPage() {
   const { t } = useTranslation();
@@ -22,15 +22,9 @@ export default function EditBannerPage() {
   useEffect(() => {
     const fetchBanner = async () => {
       try {
-        const data = await getData({
-          endpoint: "/api/banner/",
-          tag: "banners",
-          revalidate: 0,
-        });
-        const banners = data?.data || data || [];
-        const found = banners.find((b) => b.id === bannerId);
-        if (found) {
-          setBanner(found);
+        const result = await fetchBannerByIdAction(bannerId);
+        if (result.success) {
+          setBanner(result.data);
         } else {
           toast.error(t("admin.bannerNotFound"));
         }
@@ -48,14 +42,9 @@ export default function EditBannerPage() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch(`/api/admin/banners/${bannerId}`, {
-        method: "PUT",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `HTTP ${res.status}`);
+      const result = await updateBannerAction(bannerId, formData);
+      if (!result.success) {
+        throw new Error(result.error || "Update banner failed");
       }
 
       toast.success(t("admin.bannerUpdated"));

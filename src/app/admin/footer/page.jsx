@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { apiGet, apiPut } from "@/lib/api/client";
 import { toast } from "sonner";
 import { useTranslation } from "@/i18n";
+import LocalizedFieldsPanel from "@/components/admin/LocalizedFieldsPanel";
 
 export default function FooterSettingsPage() {
   const { t } = useTranslation();
+  const router = useRouter();
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -36,12 +39,18 @@ export default function FooterSettingsPage() {
     setSettings((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
+  const handleLocalizedChange = (fieldKey, locale, value) => {
+    setSettings((prev) => ({ ...prev, [`${fieldKey}_${locale}`]: value }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
       const result = await apiPut("/api/footer", { body: settings });
       if (result?.success) {
         toast.success(t("admin.footerSaved"));
+        window.dispatchEvent(new Event("footer:updated"));
+        router.refresh();
       } else {
         toast.error(t("admin.footerSaveError"));
       }
@@ -69,6 +78,53 @@ export default function FooterSettingsPage() {
         <p className="text-sm text-muted-foreground">
           {t("admin.manageFooter")}
         </p>
+      </div>
+
+      {/* Localized Footer Content */}
+      <div className="bg-card border border-border rounded-xl p-6">
+        <LocalizedFieldsPanel
+          title={t("admin.footerTitles")}
+          values={settings || {}}
+          onChange={handleLocalizedChange}
+          fields={[
+            {
+              key: "working_hours_title",
+              label: t("admin.workingHoursTitle"),
+              placeholder: {
+                uz: t("admin.titleUz"),
+                ru: t("admin.titleRu"),
+                en: t("admin.titleEn"),
+              },
+            },
+            {
+              key: "working_hours",
+              label: t("admin.workingHours"),
+              placeholder: {
+                uz: t("admin.workingHoursPlaceholder"),
+                ru: t("admin.workingHoursPlaceholder"),
+                en: t("admin.workingHoursPlaceholder"),
+              },
+            },
+            {
+              key: "subscribe_title",
+              label: t("admin.subscribeTitle"),
+              placeholder: {
+                uz: t("admin.titleUz"),
+                ru: t("admin.titleRu"),
+                en: t("admin.titleEn"),
+              },
+            },
+            {
+              key: "copyright_text",
+              label: t("admin.copyrightText"),
+              placeholder: {
+                uz: t("admin.copyrightPlaceholder"),
+                ru: t("admin.copyrightPlaceholder"),
+                en: t("admin.copyrightPlaceholder"),
+              },
+            },
+          ]}
+        />
       </div>
 
       {/* Contact Info */}
@@ -108,14 +164,6 @@ export default function FooterSettingsPage() {
               value={settings?.email || ""}
               onChange={(e) => handleChange("email", e.target.value)}
               placeholder={t("admin.emailPlaceholder")}
-            />
-          </div>
-          <div>
-            <label className="text-sm text-muted-foreground mb-1 block">{t("admin.workingHours")}</label>
-            <Input
-              value={settings?.working_hours || ""}
-              onChange={(e) => handleChange("working_hours", e.target.value)}
-              placeholder={t("admin.workingHoursPlaceholder")}
             />
           </div>
         </div>
@@ -163,18 +211,6 @@ export default function FooterSettingsPage() {
       </div>
 
       {/* Copyright */}
-      <div className="bg-card border border-border rounded-xl p-6 space-y-4">
-        <h3 className="font-medium text-foreground">{t("admin.additional")}</h3>
-        <div>
-          <label className="text-sm text-muted-foreground mb-1 block">{t("admin.copyrightText")}</label>
-          <Input
-            value={settings?.copyright_text || ""}
-            onChange={(e) => handleChange("copyright_text", e.target.value)}
-            placeholder={t("admin.copyrightPlaceholder")}
-          />
-        </div>
-      </div>
-
       {/* Save button */}
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={saving}>

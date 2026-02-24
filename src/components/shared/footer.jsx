@@ -5,29 +5,39 @@ import React, { useState, useEffect } from 'react'
 import { Separator } from '../ui/separator'
 import { usePathname } from 'next/navigation'
 import { getData } from '../../../actions/get'
-import { useTranslation } from "@/i18n"
+import { DEFAULT_LOCALE, useTranslation } from "@/i18n"
 
 export default function Footer() {
   const pathname = usePathname()
   const [settings, setSettings] = useState(null)
-  const { t } = useTranslation()
+  const { t, locale } = useTranslation()
+
+  const fetchFooter = async () => {
+    try {
+      const data = await getData({
+        endpoint: "/api/footer",
+        tag: "footer",
+        revalidate: 0,
+        throwOnError: false,
+        ignoreStatuses: [401, 403, 404],
+      })
+      setSettings(data?.data || data || null)
+    } catch (error) {
+      console.error("Footer yuklashda xatolik:", error)
+    }
+  }
 
   useEffect(() => {
-    const fetchFooter = async () => {
-      try {
-        const data = await getData({
-          endpoint: "/api/footer",
-          tag: "footer",
-          revalidate: 0,
-          throwOnError: false,
-          ignoreStatuses: [401, 403, 404],
-        })
-        setSettings(data?.data || data || null)
-      } catch (error) {
-        console.error("Footer yuklashda xatolik:", error)
-      }
-    }
     fetchFooter()
+  }, [pathname, locale])
+
+  useEffect(() => {
+    const handleFooterUpdated = () => {
+      fetchFooter()
+    }
+
+    window.addEventListener("footer:updated", handleFooterUpdated)
+    return () => window.removeEventListener("footer:updated", handleFooterUpdated)
   }, [])
 
   if (pathname == "/login" || pathname == "/register" || pathname == "/forgot-password") {
@@ -54,12 +64,25 @@ export default function Footer() {
     socialLinks.push({ href: settings.tiktok, icon: "/icons/tiktok.svg", alt: "TikTok" })
   }
 
-  const address = settings?.address || ""
+  const getLocalizedSetting = (baseKey, fallback) => {
+    const localizedKey = `${baseKey}_${locale}`;
+    const defaultKey = `${baseKey}_${DEFAULT_LOCALE}`;
+    return (
+      (settings && settings[localizedKey]) ||
+      (settings && settings[defaultKey]) ||
+      fallback
+    );
+  };
+  const address = getLocalizedSetting("address", settings?.address || "")
   const phone = settings?.phone || ""
   const phone2 = settings?.phone2 || ""
   const email = settings?.email || ""
-  const workingHours = settings?.working_hours || ""
-  const copyrightText = settings?.copyright_text || `© ${new Date().getFullYear()} SHAFRAN. All Rights Reserved.`
+  const workingHours = getLocalizedSetting("working_hours", settings?.working_hours || "")
+  const workingHoursTitle = getLocalizedSetting("working_hours_title", t("footer.workingHours"));
+  const subscribeTitle = getLocalizedSetting("subscribe_title", t("footer.subscribe"));
+  const defaultCopyright = `© ${new Date().getFullYear()} SHAFRAN. All Rights Reserved.`
+  const copyrightText =
+    getLocalizedSetting("copyright_text", settings?.copyright_text || defaultCopyright)
 
   return (
     <footer className='text-xs sm:text-sm md:text-md relative bg-[#F9F9F9] dark:bg-[#272727] w-full h-auto before:bg-neutral-200 dark:before:bg-[#CBCBCB] before:absolute before:-top-1 before:w-full before:h-[2px]'>
@@ -93,14 +116,14 @@ export default function Footer() {
           </div>
           {workingHours && (
             <div>
-              <h1>{t("footer.workingHours")}</h1>
+            <h1>{workingHoursTitle}</h1>
               <ul className='text-neutral-500 dark:text-[#7C7C7C]'>
                 <li>{workingHours}</li>
               </ul>
             </div>
           )}
           <div>
-            <h1>{t("footer.subscribe")}</h1>
+            <h1>{subscribeTitle}</h1>
             <ul className='text-neutral-500 dark:text-[#7C7C7C]'>
               {phone && <li>{phone}</li>}
               {socialLinks.length > 0 && (

@@ -90,11 +90,23 @@ export function I18nProvider({ children }) {
 
   // Initialize locale from localStorage
   useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const queryLocale = searchParams.get("lang");
+    if (queryLocale && LOCALES.includes(queryLocale)) {
+      setLocaleState(queryLocale);
+      localStorage.setItem(STORAGE_KEY, queryLocale);
+      return;
+    }
+
     const savedLocale = localStorage.getItem(STORAGE_KEY);
     if (savedLocale && LOCALES.includes(savedLocale)) {
       setLocaleState(savedLocale);
     }
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   // Load translations when locale changes
   useEffect(() => {

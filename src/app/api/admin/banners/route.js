@@ -1,15 +1,18 @@
 import { NextResponse } from "next/server";
 
 const backendUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8082";
+export const runtime = "nodejs";
 
 // POST - Yangi banner yaratish (backendga FormData proxy)
 export async function POST(request) {
   try {
-    const formData = await request.formData();
+    const contentType = request.headers.get("content-type") || "";
 
     const response = await fetch(`${backendUrl}/api/banner/`, {
       method: "POST",
-      body: formData,
+      headers: contentType ? { "Content-Type": contentType } : undefined,
+      body: request.body,
+      duplex: "half",
     });
 
     const data = await response.json().catch(() => ({}));

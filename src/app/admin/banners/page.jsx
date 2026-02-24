@@ -14,20 +14,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { getData } from "../../../../actions/get";
-import { deleteData } from "../../../../actions/post";
 import { toast } from "sonner";
 import { useTranslation } from "@/i18n";
+import { deleteBannerAction, fetchBannersAction } from "./actions";
 
 const FALLBACK_IMAGE = "/background/creed.webp";
-const backendUrl =
-  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8082";
+const backendUrl = (
+  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8082"
+).replace(/\/+$/, "");
 
 function getBannerImage(banner) {
   const path = banner.image_uz || banner.image_ru || banner.image_en;
   if (!path) return FALLBACK_IMAGE;
   if (path.startsWith("http") || path.startsWith("data:")) return path;
-  return `${backendUrl}${path}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${backendUrl}${normalizedPath}`;
 }
 
 export default function BannersPage() {
@@ -39,12 +40,11 @@ export default function BannersPage() {
 
   const fetchBanners = async () => {
     try {
-      const data = await getData({
-        endpoint: "/api/banner/",
-        tag: "banners",
-        revalidate: 0,
-      });
-      setBanners(data?.data || data || []);
+      const result = await fetchBannersAction();
+      if (!result.success) {
+        throw new Error(result.error || "Fetch banners failed");
+      }
+      setBanners(result.data || []);
     } catch (error) {
       console.error(t("admin.dataLoadError"), error);
       setBanners([]);
@@ -66,11 +66,7 @@ export default function BannersPage() {
     if (!selectedBanner) return;
 
     try {
-      const result = await deleteData({
-        endpoint: `/api/banner/${selectedBanner.id}`,
-        revalidateTags: ["banners"],
-        revalidatePaths: ["/", "/admin/banners"],
-      });
+      const result = await deleteBannerAction(selectedBanner.id);
 
       if (result.success) {
         toast.success(t("admin.bannerDeleted"));

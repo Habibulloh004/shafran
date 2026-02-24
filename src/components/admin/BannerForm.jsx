@@ -16,23 +16,82 @@ const LANGUAGES = [
 ];
 
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_ORIGINAL_FILE_SIZE = 12 * 1024 * 1024; // 12MB
+const TARGET_UPLOAD_SIZE = 900 * 1024; // ~900KB to avoid backend 413 limits
+const MIN_QUALITY = 0.45;
+const MAX_DIMENSION = 1920;
 
-const backendUrl =
-  process.env.NEXT_PUBLIC_BASE_URL ||
-  process.env.BASE_URL ||
-  "http://localhost:8082";
+const backendUrl = (
+  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8082"
+).replace(/\/+$/, "");
 
 function getFullImageUrl(path) {
   if (!path) return null;
   if (path.startsWith("http") || path.startsWith("data:")) return path;
-  return `${backendUrl}${path}`;
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${backendUrl}${normalizedPath}`;
+}
+
+function loadImageFromFile(file) {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const image = new window.Image();
+    image.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(image);
+    };
+    image.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Image load failed"));
+    };
+    image.src = objectUrl;
+  });
+}
+
+function canvasToBlob(canvas, quality) {
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), "image/webp", quality);
+  });
+}
+
+async function optimizeImageForUpload(file) {
+  if (file.size <= TARGET_UPLOAD_SIZE) return file;
+
+  const image = await loadImageFromFile(file);
+  const scale = Math.min(1, MAX_DIMENSION / Math.max(image.width, image.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.max(1, Math.round(image.width * scale));
+  canvas.height = Math.max(1, Math.round(image.height * scale));
+
+  const ctx = canvas.getContext("2d");
+  if (!ctx) throw new Error("Canvas context unavailable");
+  ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  let quality = 0.9;
+  let blob = await canvasToBlob(canvas, quality);
+
+  while (blob && blob.size > TARGET_UPLOAD_SIZE && quality > MIN_QUALITY) {
+    quality -= 0.1;
+    blob = await canvasToBlob(canvas, quality);
+  }
+
+  if (!blob) {
+    throw new Error("Image compression failed");
+  }
+
+  if (blob.size > TARGET_UPLOAD_SIZE) {
+    throw new Error("Compressed image is still too large");
+  }
+
+  const name = file.name.replace(/\.[^.]+$/, "") || "banner-image";
+  return new File([blob], `${name}.webp`, { type: "image/webp" });
 }
 
 export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
   const { t } = useTranslation();
   const [title, setTitle] = useState(banner?.title || "");
   const [url, setUrl] = useState(banner?.url || "");
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
 
   const [imageFiles, setImageFiles] = useState({ uz: null, ru: null, en: null });
   const [previews, setPreviews] = useState({
@@ -47,7 +106,7 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
     en: useRef(null),
   };
 
-  const handleFileChange = (lang, e) => {
+  const handleFileChange = async (lang, e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -56,13 +115,25 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
       return;
     }
 
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error(t("admin.fileTooLarge"));
+    if (file.size > MAX_ORIGINAL_FILE_SIZE) {
+      toast.error("Image is too large. Max original size is 12MB.");
       return;
     }
 
-    setImageFiles((prev) => ({ ...prev, [lang]: file }));
-    setPreviews((prev) => ({ ...prev, [lang]: URL.createObjectURL(file) }));
+    try {
+      setIsProcessingImage(true);
+      const optimizedFile = await optimizeImageForUpload(file);
+      setImageFiles((prev) => ({ ...prev, [lang]: optimizedFile }));
+      setPreviews((prev) => ({ ...prev, [lang]: URL.createObjectURL(optimizedFile) }));
+    } catch (error) {
+      console.error("Image optimization error:", error);
+      toast.error("Image could not be optimized. Please choose a smaller file.");
+      if (fileInputRefs[lang].current) {
+        fileInputRefs[lang].current.value = "";
+      }
+    } finally {
+      setIsProcessingImage(false);
+    }
   };
 
   const removeImage = (lang) => {
@@ -220,7 +291,7 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
                       {t("admin.uploadImageForLang")}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      JPG, PNG, WEBP (max 5MB)
+                      JPG, PNG, WEBP (auto-optimized for upload)
                     </span>
                   </button>
                 )}
@@ -243,7 +314,7 @@ export default function BannerForm({ banner, onSubmit, onCancel, isLoading }) {
         </Button>
         <Button
           type="submit"
-          disabled={isLoading || !title.trim()}
+          disabled={isLoading || isProcessingImage || !title.trim()}
           className="flex-1"
         >
           {isLoading ? (

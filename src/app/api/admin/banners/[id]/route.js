@@ -1,16 +1,19 @@
 import { NextResponse } from "next/server";
 
 const backendUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8082";
+export const runtime = "nodejs";
 
 // PUT - Bannerni yangilash (backendga FormData proxy)
 export async function PUT(request, { params }) {
   try {
-    const { id } = await params;
-    const formData = await request.formData();
+    const { id } = params;
+    const contentType = request.headers.get("content-type") || "";
 
     const response = await fetch(`${backendUrl}/api/banner/${id}`, {
       method: "PUT",
-      body: formData,
+      headers: contentType ? { "Content-Type": contentType } : undefined,
+      body: request.body,
+      duplex: "half",
     });
 
     const data = await response.json().catch(() => ({}));

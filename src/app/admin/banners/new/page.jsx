@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import BannerForm from "@/components/admin/BannerForm";
 import { toast } from "sonner";
 import { useTranslation } from "@/i18n";
+import { createBannerAction } from "../actions";
 
 export default function NewBannerPage() {
   const { t } = useTranslation();
@@ -17,14 +18,9 @@ export default function NewBannerPage() {
     setIsSubmitting(true);
 
     try {
-      const res = await fetch("/api/admin/banners", {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || `HTTP ${res.status}`);
+      const result = await createBannerAction(formData);
+      if (!result.success) {
+        throw new Error(result.error || "Create banner failed");
       }
 
       toast.success(t("admin.bannerAdded"));
