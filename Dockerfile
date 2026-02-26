@@ -6,6 +6,12 @@ RUN npm ci
 FROM node:20-alpine AS builder
 WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1
+ARG BASE_URL=http://localhost:8080
+ARG NEXT_PUBLIC_BASE_URL=http://localhost:8080
+ARG NEXT_PUBLIC_SITE_URL=http://localhost:3000
+ENV BASE_URL=$BASE_URL
+ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
+ENV NEXT_PUBLIC_SITE_URL=$NEXT_PUBLIC_SITE_URL
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
