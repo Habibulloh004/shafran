@@ -97,14 +97,14 @@ export default function ProfileInfoSection({ profile = {} }) {
             {t("profile.updatePersonalInfo")}
           </p>
         </div>
-        <Button
+        {/* <Button
           type="button"
           variant="ghost"
           className="text-sm text-blue-600 hover:text-blue-700 hover:bg-transparent"
           onClick={() => setForgotModalOpen(true)}
         >
           {t("auth.forgotPassword")}
-        </Button>
+        </Button> */}
       </div>
 
       <Card className="border-border/50 shadow-sm">
